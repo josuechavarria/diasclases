@@ -1,0 +1,18 @@
+{% extends "base_login.html" %}
+
+{% block content %}
+	<form class="custom"  id="miform" name="miform" method="POST" data-abide novalidate="novalidate">
+		{% csrf_token %}
+		<div class="id_usernfdame-field" id="firstStop">
+			<label>{{form.username.label}} <small>obligatorio</small></label>
+			{{form.username}}
+			<small class="error">El usuario es obligatorio y debe ser su identidad. (13 n&uacute;meros)</small>
+		</div>
+		<div class="id_password-field" id="numero1">
+			<label>{{form.password.label}} <small>Obligatorio</small></label>
+			{{form.password}}
+			<small class="error">La contrase&ntilde;a es obligatoria.</small>
+		</div>
+			<button type="submit" class="button expand" id="numero2">Entrar</button>
+	</form>
+{% endblock %}

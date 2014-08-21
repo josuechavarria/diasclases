@@ -1,0 +1,81 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li><a href="{% url 'vista_consultar_centros' %}">Consultar Información</a></li>
+	  <li class="unavailable"><a href="#">REPORTE SEMANAL - <b>{{centro_info.centro}}</b></a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="large-12 columns">
+	<h5> Información del centro educativo: </h5>
+		<table id="id_centrolist">
+			 <thead>
+			    <tr>
+			      <th>Codigo</th>
+			      <th>Nombre Centro</th>
+			      <th>Identidad Voluntario</th>
+			      <th>Nombre Voluntario</th>
+			      <th>Jornada</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr>
+			      <td>{{centro_info.centro.codigo}}</td>
+			      <td>{{centro_info.centro.nombre}}</td>
+			      <td>{{centro_info.voluntario.identidad}}</td>
+			      <td>{{centro_info.voluntario.nombre_completo}}</td>
+			      <td>{{centro_info.jornada.descripcion}}</td>
+			    </tr>
+			  </tbody>
+		</table>
+	<h5> Semanas reportadas del centro educativo: </h5>
+		{% if centro %}
+			<span class="label">Haga click en una semana para expandir</span>
+			{% regroup centro by semana as centro_list %}
+
+			<dl class="accordion" data-accordion>
+			{% for cen in centro_list %}
+			  <dd class="accordion-navigation">
+			    <a href="#panel{{cen.grouper.pk}}">{{cen.grouper}}</a>
+			    <div id="panel{{cen.grouper.pk}}" class="content">
+			     <div class="row">
+						<div class="large-12 columns">
+							<table id="id_centrolist">
+							  <thead>
+							    <tr>
+							      <th>Día</th>
+							      <th>¿Hubo clases?</th>
+							      <th>Razón</th>
+							    </tr>
+							  </thead>
+							  <tbody>
+							  {% for c in cen.list %}
+							    <tr>
+							      <td>{{c.fecha|date:"l"}}</td>
+							      <td>{% if c.hubo_clases == True %} SI {% else %} NO {% endif%}</td>
+							      <td>{{c.razon.descripcion}}</td>
+							    </tr>
+							  {% endfor %}
+							  </tbody>
+							</table>
+						</div>
+					</div>
+			    </div>
+			  </dd>
+			{% endfor %}
+			</dl>
+					
+		{% endif %}
+		</div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+	
+{% endblock %}

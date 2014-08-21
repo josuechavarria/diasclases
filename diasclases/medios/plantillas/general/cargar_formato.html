@@ -1,0 +1,95 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Cargar Formato</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+	<div class="row">
+		
+			<div class="large-12 columns">
+				<h3>Seleccione el archivo a cargar</h3><h6>Formatos permitidos (.xlsx Excel 2007-2013)</h6>
+			</div>
+		
+		</div>
+	<form method="POST" id="frm_cargar" class="form-horizontal" role="form" enctype="multipart/form-data">
+		{{ formulario.non_field_errors }}
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-6 columns">
+		      <div class="row collapse">
+		        <div class="small-10 columns">
+		          <input type="file" name="excel" id="id_excel" required="required">
+		        </div>
+		      </div>
+		    </div>
+		</div>
+
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<a class="button small " href="{% url 'vista_inicio' %}"><i class="icon-arrow-left"></i> Atras</a>
+				<button type="submit" class="button small" id="btn_upload"><i class="icon-upload"></i> Cargar Formato</button>
+			</div>
+		
+		</div>
+	</form>
+
+	<div class="row">
+		
+		<div class="large-12 columns">
+			{% if mensaje %}
+				<p><span class="label alert">Advertencia! </span> Se encontraron los siguientes errores al procesar el archivo:  <u>Sus datos NO se han guardado.</u></p>
+				<div data-alert class="alert-box warning radius">
+					<ul>
+					  {% for e in mensaje %}
+					  	{% autoescape off %}
+					  	<li>{{e.numero}}. {{e.descripcion}}</li>
+					  	{% endautoescape %}
+					  {% endfor %}
+					 <a href="#" class="close">&times;</a>
+					</ul>
+				</div>
+			{% endif %}
+			{% if completo %}
+				<div data-alert class="alert-box success radius">
+					<p>Archivo subido exitosamente!</p>
+				</div>
+			{% endif %}
+		</div>
+		
+	</div>
+	
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+
+		})
+	</script>
+{% endblock %}

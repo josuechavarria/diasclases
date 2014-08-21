@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Iniciar Sesi&oacute;n</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+	<!--link rel="stylesheet/less" href="less/bootstrap.less" type="text/css" /-->
+	<!--link rel="stylesheet/less" href="less/responsive.less" type="text/css" /-->
+	<!--script src="js/less-1.3.3.min.js"></script-->
+	<!--append ‘#!watch’ to the browser URL, then refresh the page. -->
+	<link href="{{ MEDIA_URL }}estaticos/css/foundation.css" rel="stylesheet">
+	<link href="{{ MEDIA_URL }}estaticos/css/joyride.css" rel="stylesheet">
+
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <link rel="shortcut icon" href="{{ MEDIA_URL }}estaticos/img/favicon.png">
+  
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/vendor/jquery.js"></script>
+
+
+</head>
+
+<body>
+<div class="row">
+	<div class="row">
+		<div class="small-12 large-12 columns">
+
+			<center>
+			<div class="row" style="margin-top: 55px;">
+				<img src="{{ MEDIA_URL }}estaticos//img/logo.jpg">
+			</div>
+			<div class="row" style="margin-top: 15px;">
+				<div class="small-6small-centered columns">
+					Iniciar sesión para acceder al sistema
+				</div>
+			</div>
+
+			</center>
+		</div>
+		<div class="small-12 small-centered columns">
+			<div class="row">
+				<div class="small-2 small-centered columns">
+					<img src="https://lh5.googleusercontent.com/-rgcGYys7Rwk/AAAAAAAAAAI/AAAAAAAAAAA/dqv5Bmpz_Ok/photo.jpg?sz=120">
+				</div>
+			</div>
+			<div class="row">
+				
+				<div class="small-5 small-centered columns">
+				{% if mensaje %}
+					<div class="alert alert-error">
+						{{mensaje}}
+					</div>
+				{% endif %}
+				<!--<img src="{{ MEDIA_URL }}estaticos//img/logo.jpg">-->
+				
+				{% block content %}
+					
+				{% endblock %}
+				</div>
+			</div>
+		</div>
+			<div class="small-12 columns">
+				<blockquote>
+					<p>
+						Si no tiene conocimiento de que datos ingresar puede mostrar el texto de ayuda. <a href="javascript: mostrar_ayuda();">Click aquí</a>.<br>
+						Puede solicitar un usuario y una contraseña enviando un correo con sus datos a esta dirección <b>info@transformemoshonduras.com, Tel: (504) 2265-0955</b>
+					</p> <small>Solicitud de Contraseña</small>
+				</blockquote>
+			</div>
+		
+	</div>
+</div>
+<ol class="joyride-list" data-joyride>
+				  <li data-id="firstStop" data-text="Siguiente" data-prev-text="Anterior">
+				  	<h4>Paso #1</h4>
+				    <p>Ingrese su numero de identidad como dato para el usuario.</p>
+				  </li>
+				  <li data-id="numero1" data-class="custom so-awesome" data-button="Siguiente" data-prev-text="Anterior">
+				    <h4>Paso #2</h4>
+				    <p>Ingrese la contraseña que le proporcionó el administrador del sitio web.</p>
+				  </li>
+				  <li data-id="numero2" data-button="Fin" data-prev-text="Anterior" data-options="tipLocation:top;tipAnimation:fade">
+				    <h4>Paso #3</h4>
+				    <p>Haga click en el botón Entrar para iniciar la sesión.</p>
+				  </li>
+				  
+			</ol>
+</body>
+
+  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.js"></script>
+  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.abide.js"></script>
+  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.forms.js"></script>
+  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.joyride.js"></script>
+
+  <script>
+  		$(document).foundation();
+	   function mostrar_ayuda(){
+	   		$(document).foundation('joyride', 'start');
+	   }
+    
+  </script>
+</html>

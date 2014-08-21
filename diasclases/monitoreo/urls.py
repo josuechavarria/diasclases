@@ -1,0 +1,8 @@
+from django.conf.urls import patterns, url
+
+urlpatterns=patterns('diasclases.monitoreo.views', 
+		url(r'^reportar-semana/$', 'view_reportar_semana', name='vista_reportar_semana'),
+		url(r'^generar-semana-ajax/(?P<centro_voluntario_id>\d+)/(?P<semana_id>\d+)/$', 'view_semana_ajax', name='vista_semana_ajax'),
+		url(r'^reportar-semana-centro/(?P<centro_voluntario_id>\d+)/$', 'view_reportar_semana_centrovoluntario', name='vista_reportar_semana_centrovoluntario'),
+		url(r'^eliminar-semana-centro/(?P<centro_voluntario_id>\d+)/(?P<semana_id>\d+)/$', 'view_eliminar_semana', name='vista_eliminar_semana'),
+)

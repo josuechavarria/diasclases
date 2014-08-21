@@ -1,0 +1,239 @@
+{% extends "base_monitoreo.html" %}
+
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li><a href="{% url 'vista_reportar_semana' %}">Monitoreo días clases</a></li>
+	  <li class="unavailable"><a href="#">Reportar Semana - <b>{{centro_voluntario.centro}}</b></a></li>
+	</ul>
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<div class="row">
+		
+			<div class="large-12 columns">
+				<h3>Información del centro educativo</h3>
+			</div>
+		
+		</div>
+<div class="row">
+	<div class="large-12 columns">
+		<ul class="tabs" data-tab>
+			<li class="tab-title active"><a href="#panel2-3">Semanas reportadas</a></li>
+		  <li class="tab-title"><a href="#panel2-1">Centro Educativo</a></li>
+		  <li class="tab-title"><a href="#panel2-2">Voluntario asignado</a></li>
+		</ul>
+		<div class="tabs-content" style="padding-bottom: 0px; margin-bottom: 0px;">
+		  <div class="content" id="panel2-1">
+		  	<table>
+			  <thead>
+			    <tr>
+			      <th width="200">Departamento</th>
+			      <th>Municipio</th>
+			      <th width="150">Aldea</th>
+			      <th width="150">Codigo Centro</th>
+			      <th width="150">Nombre Centro</th>
+			      <th width="150">Jornada a reportar</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr>
+			      <td>{{centro_voluntario.centro.departamento}}</td>
+			      <td>{{centro_voluntario.centro.municipio}}</td>
+			      <td>{{centro_voluntario.centro.aldea}}</td>
+			      <td>{{centro_voluntario.centro.codigo}}</td>
+			      <td>{{centro_voluntario.centro.nombre}}</td>
+			      <td>{{centro_voluntario.jornada}}</td>
+			    </tr>
+			    
+			  </tbody>
+			</table>
+		  </div>
+		  <div class="content" id="panel2-2">
+		    <table>
+			  <thead>
+			    <tr>
+			      <th width="200">Identidad</th>
+			      <th>Nombre</th>
+			      <th width="150">Telefono</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr>
+			      <td>{{centro_voluntario.voluntario.identidad}}</td>
+			      <td>{{centro_voluntario.voluntario.nombre_completo}}</td>
+			      <td>{{centro_voluntario.voluntario.telefono}}</td>
+			    </tr>
+			    
+			  </tbody>
+			</table>
+		  </div>
+		  <div class="content active" id="panel2-3">
+		    <table id="reportesemana">
+			  <thead>
+			    <tr>
+			      <th width="30">Núm.</th>
+			      <th>Fecha Inicio</th>
+			      <th>Fecha Finalización</th>
+			      <th></th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			  {% for r in reportadas %}
+			    <tr>
+			      <td>{{r.pk}}</td>
+			      <td>{{r.fecha_inicio|date:"l d F Y"}}</td>
+			      <td>{{r.fecha_fin|date:"l d F Y"}}</td>
+			      <td><a href="{% url 'vista_eliminar_semana' centro_voluntario.pk r.pk %}">Eliminar</a></td>
+			    </tr>
+			  {% empty %}
+			  	<tr><td colspan="3"><p>No hay semanas reportadas para este centro!</p></td>
+			  	</tr>
+			  {% endfor %}
+			  </tbody>
+			</table>
+		  </div>
+		</div>
+	</div>
+</div>
+<div class="row">
+		
+			<div class="large-12 columns">
+				<h3>Datos de la semana a reportar</h3>
+			</div>
+		
+		</div>
+<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_centro">Elija la semana a reportar: </label>
+				<select id="id_semena" name="semana" required="required">
+				<option value>-------------</option>
+				{% for s in calendario %}
+					<option value='{{s.pk}}'>{{s.fecha_inicio|date:"l d M Y"}}</option>
+				{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+				<table>
+				  <thead>
+				    <tr>
+				      <th width="200">Dia</th>
+				      <th width="300">
+				      ¿Hubo clase?</br>
+				      Por favor marque una opción
+				      </th>
+				      <th width="400">Razon dada a los niños y padres</br> de por qué NO hubo clase</th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				  {% for s in semana %}
+				    <tr>
+				      <td>{{s.dia|date:"l"}}</td>
+				      <td><input id="id_dia_{{s.id}}_si" type="radio" value='SI' checked="true" name="dia_{{s.id}}"></input><label for="id_dia_{{s.id}}_si">SI</label>
+				      <input id="id_dia_{{s.id}}_no" type="radio" value='NO' name="dia_{{s.id}}"></input><label for="id_dia_{{s.id}}_no">NO</label></td>
+				      <td><select hidden="true" id="id_razon_{{s.id}}" name="razon_{{s.id}}">
+				      	<option value=''>-----------</option>
+				      	{% for r in razones %}
+				      		<option value="{{r.pk}}">{{r.descripcion}}</option>
+				      	{% endfor %}
+				      </select><input type="hidden" id="id_fecha_{{s.id}}" name="fecha_{{s.id}}" value='{{s.dia|date:"SHORT_DATE_FORMAT"}}'></input></td>
+				    </tr>
+				   {% empty %}
+				   		<tr><td colspan="3">Elija una semana a reportar.</td></tr>
+				   {% endfor %}
+				  </tbody>
+				</table>
+			</div>
+			
+		</div>
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<input type="hidden" id="id_centrovoluntario" name="centrovoluntario" value="{{centro_voluntario.pk}}"></input>
+				<a class="button small" href="{% url 'vista_reportar_semana' %}"><i class="icon-arrow-left"></i> Atrás</a>
+				<button type="submit" class="button small"><i class="icon-save"></i> Guardar semana </button>
+			</div>
+		
+		</div>
+</form>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+	{% if calendario_id %}
+		$("#id_semena option[value="+ {{calendario_id}} +"]").attr("selected",true);
+	{% endif %}
+	{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+	{% endif %}
+
+	{% for s in semana %}
+		$("#id_dia_{{s.id}}_no").on("click", function(e){
+			$("#id_razon_{{s.id}}").attr('required', 'required')
+			$("#id_razon_{{s.id}}").removeAttr('hidden')
+		})
+		$("#id_dia_{{s.id}}_si").on("click", function(e){
+			$("#id_razon_{{s.id}}").removeAttr('required')
+			$("#id_razon_{{s.id}}").attr('hidden', 'true')
+		})
+	{% endfor %}
+
+	$.extend($.fn.dataTable.defaults, {
+	    "searching": false,
+	    "ordering": false,
+	    "show": false,
+	    "processing": true,
+	    "autoWidth": false,
+	    "lengthChange": false,
+	    "info": false,
+	    "language": {
+		    "paginate": {
+		      "first": "Primero",
+		      "previous": "Anterior",
+		      "next": "Siguiente",
+		      "last": "Último",
+		    }
+  		},
+  		"pageLength": 4
+	});
+
+	{% if reportadas|length > 4 %}
+		$("#reportesemana").dataTable()
+		$(".paginate_button").addClass('button tiny secondary')
+	{% endif %}
+
+
+	$("#id_semena").on('change',function(){
+		if(!$.isEmptyObject($(this).val())){
+			url="{% url 'vista_semana_ajax' centro_voluntario.pk 0 %}".replace('0',$(this).val());
+			location.href= url;
+		}
+	})
+</script>
+{% endblock %}

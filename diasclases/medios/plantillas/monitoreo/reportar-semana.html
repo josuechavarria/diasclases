@@ -1,0 +1,209 @@
+{% extends "base_monitoreo.html" %}
+
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Monitoreo días clases</a></li>
+	</ul>
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+
+		<div class="row">
+			<div class="large-8 columns">
+				<label for="id_listacentros"><span class="label">Elija el centro educativo que desea reportar: </span></label>
+				<select id="id_listacentros" name="listacentros" required="required">
+					<option value=''>-------------</option>
+				{% for c in data %}
+					<option value="{{c.pk}}">{{c.codigo}} | {{c.nombre}} | {{c.nivel}}</option>
+				{% endfor %}
+				</select>
+			</div>
+			
+		</div><br/>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_centro">Nombre del centro educativo: </label>
+				<input type="text" id="id_centro" name="centro" readonly="readonly" required="required" />
+			</div>
+			<div class="large-6 columns">
+				<label for="id_codigo">Codigo: </label>
+				<input type="text" id="id_codigo"  name="codigo" readonly="readonly" required="required" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_tipo_docente"><span class="label">Tipo de centro: </span></label>
+				<label for="id_tipo_docente_1" >
+					<input id="id_tipo_docente_1" type="radio" value="UNIDOCENTE" name="tipo_docente"></input>
+					<span class="lbl">Unidocente &nbsp;</span>
+				</label>
+				<label for="id_tipo_docente_2">
+					<input id="id_tipo_docente_2" type="radio" value="BIDOCENTE" name="tipo_docente"></input>
+					<span class="lbl">Bidocente &nbsp;</span>
+				</label>
+				<label for="id_tipo_docente_3">
+					<input id="id_tipo_docente_3" type="radio" value="MULTIDOCENTE" name="tipo_docente"></input>
+					<span class="lbl">Multidocente &nbsp;</span>
+				</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-8 columns">
+				<label for="id_jornada"><span class="label">Elija la jornada que desea reportar: </span></label>
+				<select id="id_jornada" name="jornada" required="required">
+					<option value>-------------</option>
+				{% for c in jornada %}
+					<option value="{{c.pk}}">{{c.descripcion}}</option>
+				{% endfor %}
+				</select>
+			</div>
+		</div>
+		<div class="row" id="div_voluntariolist" hidden="true">
+			<div class="large-8 columns">
+				<label for="id_voluntariolist"><span class="label">Nota: Este centro tiene mas de un voluntario asignado por favor elija uno:</span></label>
+				<select id="id_voluntariolist" name="voluntariolist">
+					<option value>-------------</option>
+				</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_voluntario">Nombre del voluntario: </label>
+				<input type="text" id="id_voluntario" name="voluntario" readonly="readonly" required="required" />
+			</div>
+			<div class="large-6 columns">
+				<label for="id_identidad">identidad: </label>
+				<input type="text" id="id_identidad" name="identidad" readonly="readonly" required="required" />
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_telefono">Teléfono del voluntario: </label>
+				<input type="text" id="id_telefono" name="telefono" readonly="readonly" required="required" />
+			</div>
+		</div>
+
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<button type="reset" class="button small "><i class="icon-ban-circle"></i> Limpiar</button>
+				<button type="submit" class="button small"> He verificado los datos y deseo continuar <i class="icon-arrow-right"></i></button>
+			</div>
+		
+		</div>
+</form>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+	var vols=''
+	$("input[name=tipo_docente]").attr('required','required')
+	$("div_voluntariolist").hide()
+	$("#id_listacentros").chosen();
+	$(".chosen-single").attr('style','height: 30px;');
+	{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+	{% endif %}
+
+	$("#id_listacentros").on('change',function(){
+				$("#id_tipo_docente_1").prop('checked', false)
+				$("#id_tipo_docente_2").prop('checked', false)
+				$("#id_tipo_docente_3").prop('checked', false)
+				$("#id_voluntario").val(String.empty)
+				$("#id_identidad").val(String.empty)
+				$("#id_telefono").val(String.empty)
+				$.ajax({
+					type: "GET",
+					data:
+						{
+							bandera: 'd',
+							id: $(this).val()
+						},
+					url: "{% url 'vista_centro_ajax' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, valjson)
+						{
+							$.each(valjson['centro'], function(key, val)
+							{
+								$("#id_centro").val(val.nombre)
+								$("#id_codigo").val(val.codigo)
+								// marcar el radiobutton
+								
+								if(val.tipo_docente.toUpperCase()=='UNIDOCENTE'){
+									$("#id_tipo_docente_1").prop('checked', true)
+								}else if(val.tipo_docente.toUpperCase()=='BIDOCENTE'){
+									$("#id_tipo_docente_2").prop('checked', true)
+								}else if(val.tipo_docente.toUpperCase()=='MULTIDOCENTE'){
+									$("#id_tipo_docente_3").prop('checked', true)
+								}
+							});
+							vols=valjson['voluntario']
+							$("#id_voluntariolist").empty()
+							$("#id_voluntariolist").append("<option value=''>---------------</option>");
+							if (vols.length > 1){
+								$("#div_voluntariolist").removeAttr('hidden')
+								$("#div_voluntariolist").show()
+								$("#id_voluntariolist").attr("required","required")
+							}else{
+								$("#div_voluntariolist").attr('hidden','true')
+								$("#div_voluntariolist").hide()
+								$("#id_voluntariolist").removeAttr("required")
+							}
+							$.each(valjson['voluntario'], function(key, val)
+							{
+								$("#id_voluntariolist").append("<option value="+ val.pk  +">" + '' + val.identidad + ' | ' + val.nombre + "</option>");
+								if (vols.length == 1){
+									$("#id_voluntario").val(val.nombre)
+									$("#id_identidad").val(val.identidad)
+									$("#id_telefono").val(val.telefono)
+								}
+							});
+
+						});
+					}
+				});
+			})
+	
+	$("#id_voluntariolist").on('change',function(){
+		
+		$.each(vols, function(key, val)
+		{
+			//alert($("#id_voluntariolist").val())
+			if (val.pk==$("#id_voluntariolist").val()){
+				$("#id_voluntario").val(val.nombre)
+				$("#id_identidad").val(val.identidad)
+				$("#id_telefono").val(val.telefono)
+			}
+				
+		});
+	})
+</script>
+{% endblock %}

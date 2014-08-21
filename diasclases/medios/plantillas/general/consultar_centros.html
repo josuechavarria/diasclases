@@ -1,0 +1,200 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Consultar Información de Centros</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+	<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+		
+			<div class="large-4 columns">
+				<label for="id_departamento">Departamento: <small>Obligatorio</small></label>
+				{{formulario.departamento}}
+			</div>
+			<div class="large-4 columns">
+				<label for="id_municipio">Municipio: </label>
+				{{formulario.municipio}}
+			</div>
+			<div class="large-4 columns">
+				<label for="id_aldea">Aldea: </label>
+				{{formulario.aldea}}
+			</div>
+		
+		
+		
+		
+			<div class="large-12 columns">
+				<a class="button small " href="{% url 'vista_inicio' %}"><i class="icon-arrow-left"></i> Atras</a>
+				<button type="submit" class="button small" id="btn_download"><i class="icon-search"></i> Buscar</button>
+			</div>
+		
+		
+		{% if centro %}
+		
+			<div class="large-12 columns">
+				<table id="id_centrolist">
+				  <thead>
+				    <tr>
+				      <th>Departamento</th>
+				      <th>Municipio</th>
+				      <th>Aldea</th>
+				      <th>Centro</th>
+				      <th>Identidad Voluntario</th>
+				      <th>Nombre Voluntario</th>
+				      <th>Jornada</th>
+				      <th>Dias clases</th>
+				      <th>Días no clases</th>
+				      <th>Acción</th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				  {% for c in centro %}
+				    <tr>
+				      <td>{{c.centro.centro.centro.departamento}}</td>
+				      <td>{{c.centro.centro.centro.municipio}}</td>
+				      <td>{{c.centro.centro.centro.aldea}}</td>
+				      <td>{{c.centro.centro.centro}}</td>
+				      <td>{{c.centro.centro.voluntario.identidad}}</td>
+				      <td>{{c.centro.centro.voluntario.nombre_completo}}</td>
+				      <td>{{c.centro.centro.jornada.descripcion}}</td>
+				      <td>{{c.total_si}}</td>
+				      <td>{{c.total_no}}</td>
+				      <td><a href="{% url 'vista_consultar_semanas' c.centro.centro.pk %}" target="_blank"><i class="icon-external-link"> Mostrar</i></a></td>
+				    </tr>
+				  {% empty %}
+				  	<tr>
+				      <td colspan="8">Sin resultados que mostrar!</td>
+				    </tr>
+				  {% endfor %}
+				  </tbody>
+				</table>
+			</div>
+		
+		{% else %}
+			<div class="large-12 columns">
+				<h5>Sin resultados que mostrar!</h5>
+			</div>
+		{% endif %}
+	</form>
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		$("#btn_download").attr("disabled",'disabled')
+		$("#id_semana").attr("disabled",'disabled')
+		$(document).ready(function(){
+			
+			$("#id_municipio").empty();
+			$("#id_municipio").append("<option value=''>----------</option>");
+			$("#id_aldea").empty();
+			$("#id_aldea").append("<option value=''>----------</option>");
+			$("#id_departamento").attr("required",'required')
+
+			{% if centro|length > 4 %}
+				$("#id_centrolist").dataTable()
+				$(".paginate_button").addClass('button tiny secondary')
+			{% endif %}
+
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+
+			$("#id_departamento").on('change',function(){
+				if ($.isEmptyObject($(this).val())){
+					$("#btn_download").attr("disabled",'disabled')
+				}else{
+					$("#btn_download").removeAttr("disabled")
+				}
+				$("#id_municipio").empty();
+				$("#id_aldea").empty();
+				$("#id_municipio").append("<option value=''>----------</option>");
+				$("#id_aldea").append("<option value=''>----------</option>");
+				
+				$.ajax({
+					type: "GET",
+					data:
+						{
+							bandera: 'd',
+							id: $(this).val()
+						},
+					url: "{% url 'vista_ajax_municipio' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, val)
+						{
+							$("#id_municipio").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+						});
+						$("#id_semana").removeAttr("disabled")
+					}
+				});
+				if ($.isEmptyObject($(this).val())){
+					$("#id_semana").attr("disabled",'disabled')
+				}
+			})
+
+			$("#id_municipio").on('change',function(){
+				$("#id_aldea").empty();
+				$("#id_centros").empty();
+				$("#id_aldea").append("<option value=''>----------</option>");
+				$.ajax({
+					type: "GET",
+					data:
+						{
+							bandera: 'm',
+							id: $(this).val()
+						},
+					url: "{% url 'vista_ajax_municipio' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, val)
+						{
+							$("#id_aldea").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+						});
+					}
+				});
+
+				$.ajax({
+					type: "GET",
+					data:
+						{
+							bandera: 'cm',
+							id: $(this).val()
+						},
+					url: "{% url 'vista_ajax_municipio' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, val)
+						{
+							$("#id_centros").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+						});
+						$("#id_centros").trigger("chosen:updated");
+					}
+				});
+			})
+
+		})
+	</script>
+{% endblock %}
