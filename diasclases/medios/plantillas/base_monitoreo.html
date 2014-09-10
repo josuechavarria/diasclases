@@ -12,11 +12,12 @@
 	<!--script src="js/less-1.3.3.min.js"></script-->
 	<!--append ‘#!watch’ to the browser URL, then refresh the page. -->
   <link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/font-awesome.min.css" />
-	<link href="{{ MEDIA_URL }}estaticos/css/foundation.css" rel="stylesheet">
-	<link href="{{ MEDIA_URL }}estaticos/css/joyride.css" rel="stylesheet">
-  <link href="{{ MEDIA_URL }}estaticos/css/jquery.gritter.css" rel="stylesheet">
-	<link href="{{ MEDIA_URL }}estaticos/css/datepicker.css" rel="stylesheet">
-  <link href="{{ MEDIA_URL }}estaticos/css/chosen.css" rel="stylesheet">
+	<link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/foundation.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/jquery.gritter.css" rel="stylesheet">
+	<link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/datepicker.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/chosen.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/jquery-ui.css">
+  <link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/jquery.dataTables.css">
 
   <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
@@ -27,42 +28,99 @@
   <link rel="shortcut icon" href="{{ MEDIA_URL }}estaticos/img/favicon.png">
   
   <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/vendor/jquery.js"></script>
-  <script type="text/javascript" src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
- <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
-  <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css">
- <link rel="stylesheet" href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+  
+  <div class="fixed sticky">
+      <nav class="top-bar" data-topbar role="navigation" data-options="sticky_on: large">
 
-  <nav class="top-bar" data-topbar>
-  <ul class="title-area">
-     <li class="name" style="margin-left: 35px;">
-     <a href="#"><img src="{{ MEDIA_URL }}estaticos/img/logo2.jpg" height="28" width="125"  /></a>
-    </li>
-     <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-    <li class="toggle-topbar menu-icon"><span>Menu</span></li>
-  </ul>
+      <ul class="title-area">
+         <li class="name" style="margin-left: 35px; margin-right: 90px;">
+         <a href="#"><img src="{{ MEDIA_URL }}estaticos/img/logo2.jpg" height="28" width="125"  /></a>
+        </li>
+         <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+        <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+      </ul>
 
-  <section class="top-bar-section">
-    <!-- Right Nav Section -->
-    <ul class="right">
-      <li class="active"><a href="{% url 'vista_nueva_persona' %}">Registrar voluntario</a></li>
-      <li><a href="{% url 'vista_reportar_semana' %}">Monitoreo días clases</a></li>
-      <li><a href="{% url 'vista_consultar_centros' %}">Consultar información</a></li>
-      <li><a href="javascript: alert('Reportes graficos no esta habilitado')">Reportes gráficos</a></li>
-      <li class="has-dropdown">
-        <a href="#">Bienvenido {{user.first_name}}</a>
-        <ul class="dropdown">
-          <li><a href="{% url 'vista_logout' %}"><i class="icon-power-off"></i>&nbsp;Cerrar sesión</a></li>
+      <section class="top-bar-section">
+        <!-- Left Nav Section -->
+        <ul class="left">
+          <li class="divider"></li>
+          <li><a href="{% url 'vista_inicio' %}"><i class="icon-home"></i>&nbsp;Inicio</a></li>
+          <li class="divider"></li>
+          {% if user.is_superuser == True %}
+              {% if perms.general.add_voluntario or perms.general.change_voluntario %}
+              <li class="has-dropdown">
+                <a href="#"><i class="icon-user"></i>&nbsp;Voluntarios</a>
+                <ul class="dropdown">
+                  {% if perms.general.add_voluntario %}
+                  <li><a href="{% url 'vista_nueva_persona' %}"><i class="icon-plus"></i>&nbsp;Registrar</a></li>
+                  {% endif %}
+                  {% if perms.general.change_voluntario %}
+                  <li><a href="{% url 'vista_buscar_voluntarios' %}"><i class="icon-edit"></i>&nbsp;Modificar</a></li>
+                  {% endif %}
+                </ul>
+              </li>
+            {% endif %}
+            <li class="divider"></li>
+        {% endif %}
+          <!--<li class="has-dropdown">
+            <a href="#"><i class="icon-user"></i>&nbsp;Facilitadores</a>
+            <ul class="dropdown">
+              <li><a href="{% url 'vista_nuevo_facilitador' %}"><i class="icon-plus"></i>&nbsp;Registrar</a></li>
+              <li><a href="#"><i class="icon-edit"></i>&nbsp;Modificar</a></li>
+            </ul>
+          </li>-->
+          {% if perms.monitoreo.puede_consultar_boletas %}
+          <li><a href="{% url 'vista_reportar_semana' %}"><i class="icon-calendar"></i>&nbsp;Monitoreo días clases</a></li>
+          <li class="divider"></li>
+          {% endif %}
+          {% if perms.general.puede_consultar_centros or perms.general.puede_consultar_voluntarios %}
+          <li class="has-dropdown">
+            <a href="#"><i class="icon-search"></i>&nbsp;Consultas</a>
+            <ul class="dropdown">
+            {% if perms.general.puede_consultar_voluntarios %}
+              <li><a href="{% url 'vista_consultar_voluntarios' %}"><i class="icon-search"></i>&nbsp;Consultar voluntarios</a></li>
+            {% endif %}
+            {% if perms.general.puede_consultar_centros %}
+              <li><a href="{% url 'vista_consultar_centros' %}"><i class="icon-search"></i>&nbsp;Consultar centros</a></li>
+            {% endif %}
+            </ul>
+          </li>
+          <li class="divider"></li>
+          {% endif %}
+          {% if perms.general.puede_agregar_facilitadores or perms.general.puede_agregar_supervisores or perms.general.puede_agregar_administradores or perms.general.puede_deshabilitar_facilitadores or perms.general.puede_deshabilitar_supervisores or perms.general.puede_deshabilitar_administradores or perms.general.puede_restablecer_clave %}
+          <li class="has-dropdown">
+            <a href="#"><i class="icon-gear"></i>&nbsp;Administrar usuarios</a>
+            <ul class="dropdown">
+              {% if perms.general.puede_agregar_facilitadores or perms.general.puede_agregar_supervisores or perms.general.puede_agregar_administradores %}
+              <li><a href="{% url 'vista_nuevo_facilitador' %}"><i class="icon-plus"></i>&nbsp;Registrar usuario</a></li>
+              {% endif %}
+              {% if perms.general.puede_editar_facilitadores or perms.general.puede_editar_supervisores or perms.general.puede_editar_administradores %}
+              <li><a href="{% url 'vista_buscar_usuarios' %}"><i class="icon-edit"></i>&nbsp;Modificar usuario</a></li>
+              {% endif %}
+              {% if perms.general.puede_restablecer_clave %}
+              <li><a href="{% url 'vista_buscar_usuarios_restablecer' %}"><i class="icon-refresh"></i>&nbsp;Restablecer Contraseña</a></li>
+              {% endif %}
+              {% if perms.general.puede_deshabilitar_facilitadores or perms.general.puede_deshabilitar_supervisores or perms.general.puede_deshabilitar_administradores %}
+              <li><a href="{% url 'vista_buscar_usuarios_deshabilitar' %}"><i class="icon-unlock"></i>/<i class="icon-lock"></i>&nbsp;Habilitar-Deshabilitar usuario</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          <li class="divider"></li>
+          {% endif %}
+          <li><a href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;{{user.groups.all.0}}&nbsp;]</a></li>
+          <li class="divider"></li>
+          <li class="has-dropdown active">
+            <a href="#">{{user.first_name}}</a>
+            <ul class="dropdown">
+              <li><a href="#"><i class="icon-refresh"></i>&nbsp;Cambiar contraseña</a></li>
+              <li><a href="{% url 'vista_logout' %}"><i class="icon-power-off"></i>&nbsp;Cerrar sesión</a></li>
+            </ul>
+          </li>
         </ul>
-      </li>
-    </ul>
-
-    <!-- Left Nav Section -->
-    <ul class="left">
-      <li><a href="{% url 'vista_inicio' %}"><i class="icon-home"></i>&nbsp;Inicio</a></li>
-    </ul>
-  </section>
-</nav>
+        <!-- Right Nav Section -->
+      </section>
+    </nav>
+  </div>
 
 </head>
 
@@ -71,14 +129,40 @@
 	<div class="large-2 columns">
 		<nav style="background-color: #FAFAFA">
 		<ul class="side-nav">
-		  <li class="heading"><i class="icon-list"></i>&nbsp;Menú de opciones</li>
+		  <!--<li class="heading"><i class="icon-list"></i>&nbsp;Menú de opciones</li>
       <li><a href="{% url 'vista_nueva_persona' %}"><i class="icon-file"></i>&nbsp;Registrar voluntario</a></li>
 		  <li><a href="{% url 'vista_reportar_semana' %}"><i class="icon-file"></i>&nbsp;Monitoreo días clases</a></li>
 		  <li><a href="{% url 'vista_consultar_centros' %}"><i class="icon-search"></i>&nbsp;Consultar centros</a></li>
       <li><a href="{% url 'vista_consultar_voluntarios' %}"><i class="icon-search"></i>&nbsp;Consultar voluntarios</a></li>
+
+      -->
+      {% if perms.monitoreo.puede_entrar_reportes %}
+      
+        {% if perms.monitoreo.puede_entrar_reportes %}
+        <li><a class="button secondary expand small" href="{% url 'vista_inicio_reportes' %}">&nbsp;Ir al módulo de reportes <i class="icon-arrow-right"></i> </a></li>
+        {% endif %}        
+      {% endif %}
+      {% if perms.monitoreo.puede_descargar_excel or perms.monitoreo.puede_cargar_excel %}
       <li class="heading"><i class="icon-list"></i>&nbsp;Formato de Excel</li>
-       <li><a href="{% url 'vista_generar_excel' %}"><i class="icon-download"></i>&nbsp;Descargar formato</a></li>
-       <li><a href="{% url 'vista_leer_excel' %}"><i class="icon-upload"></i>&nbsp;Cargar formato</a></li>
+        {% if perms.monitoreo.puede_descargar_excel %}
+        <li><a href="{% url 'vista_generar_excel' %}"><i class="icon-download"></i>&nbsp;Descargar formato</a></li>
+        {% endif %}
+        {% if perms.monitoreo.puede_cargar_excel %}
+        <li><a href="{% url 'vista_leer_excel' %}"><i class="icon-upload"></i>&nbsp;Cargar formato</a></li>
+        {% endif %}
+      {% endif %}
+
+      {% if perms.monitoreo.add_calendario_academico %}
+      <li class="heading"><i class="icon-list"></i>&nbsp;Calendario académico</li>
+        {% if perms.monitoreo.add_calendario_academico %}
+        <li><a href="{% url 'vista_generar_calendario' %}"><i class="icon-calendar"></i>&nbsp;Generar calendario </a></li>
+        <li><a href="{% url 'vista_listar_calendario' %}"><i class="icon-calendar"></i>&nbsp;Ver calendario </a></li>
+        <li><a href="{% url 'vista_eliminar_semanacalendario' %}"><i class="icon-calendar"></i>&nbsp;Borrar semana del calendario </a></li>
+        {% endif %}
+      {% endif %}
+
+     
+
 		  <li><a href="{% url 'vista_logout' %}"><i class="icon-power-off"></i>&nbsp;Terminar la sesión</a></li>
 		</ul>
 		</nav>
@@ -96,7 +180,6 @@
       {% endblock %}
 
       {% block content %}
-
           <ul class="small-block-grid-5">
             
             <li><a class="th" href="{{ MEDIA_URL }}estaticos/img/200.jpg">
@@ -135,20 +218,34 @@
 			</ol>
 </body>
 
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.alerts.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.dropdown.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.forms.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.joyride.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.accordion.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.tab.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.reveal.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.topbar.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.interchange.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/jquery.gritter.min.js"></script>
-  <script src="{{ MEDIA_URL }}estaticos/js/chosen.jquery.js"></script>
+  
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.orbit.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.alert.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.dropdown.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.joyride.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.accordion.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.tab.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.reveal.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.topbar.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.interchange.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/jquery.gritter.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/chosen.jquery.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/jquery-ui.js"></script>
+
   <script>
     $(document).foundation();
+    $(document).foundation({
+      orbit: {
+        animation: 'slide',
+        timer_speed: 1000,
+        pause_on_hover: true,
+        animation_speed: 500,
+        navigation_arrows: true,
+        bullets: false
+      }
+    });
    function mostrar_ayuda(){
    		$(document).foundation('joyride', 'start');
    }

@@ -49,7 +49,12 @@
 				      <th>Aldea</th>
 				      <th>Identidad</th>
 				      <th>Nombre completo</th>
+				      {% if perms.general.puede_consultar_centrosasignados_voluntarios %}
 				      <th>Centros asignados</th>
+				      {% endif %}
+				      {% if user.groups.all.0.name == 'SUPERVISOR' %}
+				      <th></th>
+				      {% endif %}
 				    </tr>
 				  </thead>
 				  <tbody>
@@ -60,8 +65,13 @@
 				      <td>{{c.aldea}}</td>
 				      <td>{{c.identidad}}</td>
 				      <td>{{c.nombre_completo}}</td>
+				      {% if perms.general.puede_consultar_centrosasignados_voluntarios %}
 				      <td><a href="#" data-reveal-id="myModal{{c.pk}}"><i class="icon-external-link"> Mostrar</i></a></td>
-				    </tr>
+				      {% endif %}
+				      {% if user.groups.all.0.name == "SUPERVISOR" %}
+				      <td><a href="{% url 'vista_editar_voluntario' c.pk %}"><i class="icon-edit"> Editar</i></a></td>
+				      {% endif %}
+				    </tr>  
 				  {% empty %}
 				  	<tr>
 				      <td colspan="8">Sin resultados que mostrar!</td>

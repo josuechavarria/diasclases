@@ -13,7 +13,16 @@ class voluntarioAdmin(admin.ModelAdmin):
 	list_display = ['departamento', 'municipio', 'identidad', 'nombre_completo']
 	search_fields = ('identidad', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido')
 
+class personaAdmin(admin.ModelAdmin):
+	def formfield_for_foreignkey(self, ac_usuario_creador, request, **kwargs):
+		if ac_usuario_creador.name == 'usuario_creador' or ac_usuario_creador.name == 'usuario_modificador':
+			kwargs['initial'] = request.user.id
+			return ac_usuario_creador.formfield(**kwargs)
+		return super(personaAdmin, self).formfield_for_foreignkey(
+			ac_usuario_creador, request, **kwargs
+		)
+	list_display = ['municipio', 'identidad', 'nombre_completo']
+	search_fields = ('identidad', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido')
+
 admin.site.register(periodo)
-admin.site.register(tipo_persona)
 admin.site.register(organizacion)
-admin.site.register(voluntario, voluntarioAdmin)

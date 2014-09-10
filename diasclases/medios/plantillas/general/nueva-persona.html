@@ -253,6 +253,7 @@
 							$("#id_centros").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre +  ' | ' + val.nivel + "</option>");
 						});
 						$("#id_centros").trigger("chosen:updated");
+						$('.default').attr('style','width: 160px; height: 30px;');
 					}
 				});
 			})

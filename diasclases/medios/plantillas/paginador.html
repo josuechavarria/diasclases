@@ -1,0 +1,41 @@
+ <div class="pagination-centered">
+	<ul class="pagination">
+	{% if instancia.has_previous %}
+		<li class="arrow"><a href="?pagina={{ instancia.previous_page_number }}">&laquo; Anterior</a></li>
+	{% else %}
+		<li class="arrow unavailable"><a href="">&laquo; Anterior</a></li>
+	{% endif %}
+	{% for number in range_i %}
+		{% ifequal instancia.number number|add:"1" %}
+			<li><a href="?pagina={{number|add:'1'}}" style="background-color:#009ACD; color:#FFFFFF;">{{number|add:"1"}}</a></li>
+		{% else %}
+			<li><a href="?pagina={{number|add:'1'}}">{{number|add:"1"}}</a></li>
+		{% endifequal %}
+	{% endfor %}
+	{% if range_m != None %}
+	<li class="unavailable"><a href="">&hellip;</a></li>
+	{% endif %}
+    {% for number in range_m %}
+		{% ifequal instancia.number number|add:"1" %}
+			<li><a href="?pagina={{number|add:'1'}}" style="background-color:#009ACD; color:#FFFFFF;">{{number|add:"1"}}</a></li>
+		{% else %}
+			<li><a href="?pagina={{number|add:'1'}}">{{number|add:"1"}}</a></li>
+		{% endifequal %}
+	{% endfor %}
+	{% if range_f != None %}
+	<li class="unavailable"><a href="">&hellip;</a></li>
+	{% endif %}
+	{% for number in range_f %}
+		{% ifequal instancia.number number|add:"1" %}
+			<li><a href="?pagina={{number|add:'1'}}" style="background-color:#009ACD; color:#FFFFFF;">{{number|add:"1"}}</a></li>
+		{% else %}
+			<li><a href="?pagina={{number|add:'1'}}">{{number|add:"1"}}</a></li>
+		{% endifequal %}
+	{% endfor %}
+	{% if instancia.has_next %}
+		<li class="arrow"><a href="?pagina={{ instancia.next_page_number }}"> Siguiente &raquo;</a></li>
+	{% else %}
+		<li class="arrow unavailable"><a href="">Siguiente &raquo;</a></li>
+	{% endif %}
+	</ul>
+</div>

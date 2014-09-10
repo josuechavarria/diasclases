@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from diasclases.general.models import *
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 
@@ -14,10 +15,10 @@ class centro_voluntario(models.Model):
 	jornada=models.ForeignKey(jornada)
 
 	class Meta:
-		unique_together = ('periodo','centro','voluntario','jornada')
+		unique_together = ('periodo','centro','jornada')
 
 	def unique_error_message(self, model_class, unique_check):
-		if model_class == type(self) and unique_check == ('periodo','centro','voluntario','jornada'):
+		if model_class == type(self) and unique_check == ('periodo','centro','jornada'):
 			return 'Este centro en esta jornada ya tiene un voluntario asignado.'
 		else:
 			return super(centro_voluntario, self).unique_error_message(model_class, unique_check)
@@ -30,6 +31,8 @@ class calendario_academico(models.Model):
 	def clean(self):
 		if((self.fecha_fin - timedelta(days=5)) != self.fecha_inicio):
 			raise ValidationError("La semana debe durar 6 días.")
+		if(self.fecha_fin <= self.fecha_inicio):
+			raise ValidationError("La fecha fin no puede ser menor que la fecha de inicio.")
 
 	def __unicode__(self):
 		return "Semana del " + str(self.fecha_inicio.strftime("%d-%b-%Y")) + " al " + str(self.fecha_fin.strftime("%d-%b-%Y"))
@@ -53,6 +56,12 @@ class centro_semana(models.Model):
 
 	class Meta:
 		unique_together = ('centro','semana','fecha')
+		permissions = (
+			("puede_descargar_excel", "Puede descargar formato de excel"),
+			("puede_cargar_excel", "Puede cargar formato de excel"),
+			("puede_consultar_boletas", "Puede consultar info de boletas"),
+			("puede_entrar_reportes", "Puede entrar al modulo de reportes"),
+		)
 
 	def unique_error_message(self, model_class, unique_check):
 		if model_class == type(self) and unique_check == ('centro','semana','fecha'):

@@ -1,0 +1,87 @@
+
+{% verbatim %}
+    {{if dying}}Still alive.{{/if}}
+{% endverbatim %}
+
+<table id="reporte" width="100%">
+	<caption>Listado de Centros</caption>
+	  <thead>
+	    <tr>
+	      <th>No.</th>
+	      <th>Cod.</th>
+	      <th>Departamento</th>
+	      {% if por_municipio == True %}
+	      <th>Cod.</th>
+	      <th>Municipio</th>
+	      {% endif %}
+	      {% if por_centro == True %}
+	      <th >Codigo</th>
+	      <th>Nombre</th>
+	      {% endif %}
+	      {% if por_nivel == True %}
+	      <th >Nivel</th>
+	      {% endif %}
+	      {% if por_tipo_centro == True %}
+	      <th >Tipo centro</th>
+	      {% endif %}
+	      {% if por_jornada == True %}
+	      <th >Jornada</th>
+	      {% endif %}
+	      {% for p in anio %}
+	      <th >Hubo Clases {{p}}</th>
+	      <th >No Hubo Clases {{p}}</th>
+	      {% endfor %}
+	    </tr>
+	  </thead>
+	  <tbody id="tbody">
+	  {% for c in instancia %}
+	    <tr>
+	      <td style="width:5%;">{{forloop.counter}}</td>
+	      <td>{{c.codigo_departamento}}</td>
+	      <td>{{c.departamento}}</td>
+	      {% if por_municipio == True %}
+	      <td>{{c.codigo_municipio}}</td>
+	      <td>{{c.municipio}}</td>
+	      {% endif %}
+	      {% if por_centro == True %}
+	      <td>{{c.codigo}}</td>
+	      <td>{{c.nombre}}</td>
+	      {% endif %}
+	      {% if por_nivel == True %}
+	      <td>{{c.nivel}}</td>
+	      {% endif %}
+	      {% if por_tipo_centro == True %}
+	      <td>{{c.tipo_centro}}</td>
+	      {% endif %}
+	      {% if por_jornada == True %}
+	      <td>{{c.jornada}}</td>
+	      {% endif %}
+	      {% for p in anio %}
+	      <td id="total_si_{{p}}_{{c.pk}}">{{c.|add:"total_si_"|add:p}}</td>
+	      <td id="total_no_{{p}}_{{c.pk}}"></td>
+	      {% endfor %}
+	    </tr>
+	  {% endfor %}
+	  </tbody>
+	</table>
+
+	<script type="text/javascript">
+
+		$("#reporte").dataTable({
+	        dom: '<"top"ifrp<"clear">>T<"clear">lfrti',
+	        tableTools: {
+	            "aButtons": [
+	                "copy",
+	                "csv",
+	                "xls",
+	                {
+	                    "sExtends": "pdf",
+	                    "sPdfOrientation": "landscape",
+	                    "sPdfMessage": "Reporte de días clases año {{anio}}."
+	                }
+	            ]
+	        }
+	    })
+	    
+	    
+	</script>
