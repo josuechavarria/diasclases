@@ -98,7 +98,27 @@
 			$("#id_aldea").append("<option value=''>----------</option>");
 			$("#id_departamento").attr("required",'required')
 
-			{% if centro|length > 4 %}
+			$.extend($.fn.dataTable.defaults, {
+			    "searching": true,
+			    "ordering": false,
+			    "show": false,
+			    "processing": true,
+			    "autoWidth": false,
+			    "lengthChange": false,
+			    "info": false,
+			    "language": {
+				    "paginate": {
+				      "first": "Primero",
+				      "previous": "Anterior",
+				      "next": "Siguiente",
+				      "last": "Último",
+				    },
+				    "search": "Buscar"
+		  		},
+		  		"pageLength": 5
+			});
+
+			{% if centro|length > 1 %}
 				$("#id_centrolist").dataTable()
 				$(".paginate_button").addClass('button tiny secondary')
 			{% endif %}

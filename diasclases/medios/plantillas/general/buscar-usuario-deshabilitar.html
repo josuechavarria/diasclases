@@ -1,0 +1,176 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Restablecer contraseña</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+	<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/jquery.confirm.js"></script>
+	<script type="text/javascript">
+		function Deshabilitar(persona_id){
+			link="{% url 'vista_usuario_deshabilitar' 0 %}".replace('/0','/'+persona_id)
+			if (confirm("¿Está seguro que desea deshabilitar este usuario?")){
+				$.ajax({
+					type: "GET",
+					url: link,
+					success: function(msg)
+					{
+						if (msg==1){
+							$.gritter.add({
+									title: '¡Éxito!',
+									text: 'Usuario deshabilitado correctamente.',
+									sticky: false,
+									time: '3000',
+									class_name: 'gritter-success gritter-center'
+							});
+						}else{
+							$.gritter.add({
+									title: '¡Falló!',
+									text: 'Ocurrió un error al Deshabilitar el usuario.',
+									sticky: false,
+									time: '15000',
+									class_name: 'gritter-error gritter-right'
+							});
+						}
+					},
+					error: function(msg)
+					{
+						alert("Error al Deshabilitar el usuario")
+					}
+				});
+			}
+		};
+
+		function Habilitar(persona_id){
+			link="{% url 'vista_usuario_habilitar' 0 %}".replace('/0','/'+persona_id)
+			if (confirm("¿Está seguro que desea habilitar este usuario?")){
+				$.ajax({
+					type: "GET",
+					url: link,
+					success: function(msg)
+					{
+						if (msg==1){
+							$.gritter.add({
+									title: '¡Éxito!',
+									text: 'Usuario habilitado correctamente.',
+									sticky: false,
+									time: '3000',
+									class_name: 'gritter-success gritter-center'
+							});
+						}else{
+							$.gritter.add({
+									title: '¡Falló!',
+									text: 'Ocurrió un error al habilitar el usuario.',
+									sticky: false,
+									time: '15000',
+									class_name: 'gritter-error gritter-right'
+							});
+						}
+					},
+					error: function(msg)
+					{
+						alert("Error al habilitar el usuario")
+					}
+				});
+			}
+		};
+	</script>
+{% endblock %}
+
+{% block content %}
+	
+	<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_identidad">Identidad: <small>Obligatorio</small></label>
+				<input type="text" id="id_identidad" name="identidad" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_primer_nombre">Primer nombre: <small>Obligatorio</small></label>
+				<input type="text" id="id_primer_nombre" name="primer_nombre" />
+			</div>
+			<div class="large-6 columns">
+				<label for="id_primer_apellido">Primer apellido: <small>Obligatorio</small></label>
+				<input type="text" id="id_primer_apellido" name="primer_apellido" />
+			</div>
+		</div>
+		
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<button type="reset" class="button small "><i class="icon-ban-circle"></i> Limpiar</button>
+				<button type="submit" class="button small"><i class="icon-search"></i> Buscar</button>
+			</div>
+		
+		</div>
+	</form>
+
+	<div class="row">
+		
+			<div class="large-12 columns">
+				<table>
+				  <thead>
+				    <tr>
+				      <th width="130">Identidad</th>
+				      <th>Nombre</th>
+				      <th width="90">Telefono</th>
+				      <th width="150">Tipo de usuario</th>
+				      <th width="150">Estado</th>
+				      <th colspan="2"></th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				  {% for p in personas %}
+				    <tr>
+				      <td>{{p.identidad}}</td>
+				      <td>{{p.nombre_completo}}</td>
+				      <td>{{p.telefono}}</td>
+				      <td>{{p.tipo_persona}}</td>
+				      <td>{% if p.user.is_active == True %} <span class="success label" >Habilitado</span> {% else %} <span class="alert label" > Dehabilitado</span> {% endif %}</td>
+				      <td><a id="id_habilitar" onclick="Habilitar('{{p.pk}}');" href="#"><i class="icon-unlock"> Habilitar</i></a></td>
+				      <td><a id="id_deshabilitar" onclick="Deshabilitar('{{p.pk}}');" href="#"><i class="icon-lock"> Deshabilitar</i></a></td>
+				    </tr>
+				  {% empty %}
+				  	<tr><td colspan="4">Ingrese los parámetros de búsqueda.</td></tr>
+				  {% endfor %}
+				  </tbody>
+				</table>
+			</div>
+		
+		</div>
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		
+		$(document).ready(function(){
+			
+
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: '{% autoescape off %}{{mensaje}} {% endautoescape %}',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+			
+		});
+	
+	</script>
+{% endblock %}

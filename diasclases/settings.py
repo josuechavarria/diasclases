@@ -56,6 +56,8 @@ TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), 'medios/plantillas'),
 )
 
+
+
 ROOT_URLCONF = 'diasclases.urls'
 
 WSGI_APPLICATION = 'diasclases.wsgi.application'
@@ -67,7 +69,7 @@ WSGI_APPLICATION = 'diasclases.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'diasclases',                      # Or path to database file if using sqlite3.
+        'NAME': 'diasclases2',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'postgres',
@@ -97,3 +99,11 @@ MEDIA_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), 'medios/')
 MEDIA_URL = '/medios/'
 
 STATIC_URL = '/static/'
+
+
+#configuracion de server de correo
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'recursos.humanos.seduc.hn@gmail.com'
+EMAIL_HOST_PASSWORD = 'seduc#123'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

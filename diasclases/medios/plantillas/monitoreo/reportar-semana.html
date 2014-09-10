@@ -125,7 +125,7 @@
 			{% if error %}
 				$.gritter.add({
 						title: '¡Falló!',
-						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						text: '{% autoescape off %}{{errores}} {% endautoescape %}',
 						sticky: false,
 						time: '15000',
 						class_name: 'gritter-error gritter-right'

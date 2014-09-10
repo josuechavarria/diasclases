@@ -1,0 +1,324 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Nuevo usuario</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+	<div class="row">
+			<div class="large-12 columns">
+				<div data-alert class="alert-box info radius">
+				  <h4>Nota importante:</h4>
+				  <p>1. Antes de guardar el usuario del Facilitador, Supervisor o Administrador VERIFIQUE que el tipo de persona sea el correcto, ya que según el tipo de persona que se esté registrando se le asignarán los privilegios en el sistema.</p>
+				  <a href="#" class="close">&times;</a>
+				</div>
+			</div>
+		</div>
+	
+	<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-4 columns">
+				<label for="id_departamento">Departamento: <small>Obligatorio</small></label>
+				{{formulario.departament}}
+			</div>
+			<div class="large-4 columns">
+				<label for="id_municipio">Municipio: <small>Obligatorio</small></label>
+				{{formulario.municipio}}
+			</div>
+			<div class="large-4 columns">
+				<label for="id_aldea">Aldea: </label>
+				{{formulario.aldea}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_identidad">Identidad: <small>Obligatorio</small></label>
+				{{formulario.identidad}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_primer_nombre">Primer nombre: <small>Obligatorio</small></label>
+				{{formulario.primer_nombre}}
+			</div>
+			<div class="large-6 columns">
+				{{formulario.segundo_nombre.label_tag}}
+				{{formulario.segundo_nombre}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_primer_apellido">Primer apellido: <small>Obligatorio</small></label>
+				{{formulario.primer_apellido}}
+			</div>
+			<div class="large-6 columns">
+				<label for="id_segundo_apellido">Segundo apellido: <small>Obligatorio</small></label>
+				{{formulario.segundo_apellido}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+		      <label>Esta persona es de sexo: <small>Obligatorio</small></label>
+		      <input type="radio" name="sexo" value="F" checked="checked" id="sexo_f"><label for="sexo_f">Femenino</label>
+		      <input type="radio" name="sexo" value="M" id="sexo_m"><label for="sexo_m">Masculino</label>
+		    </div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+		      	<label for="id_fecha_nacimiento">Fecha de nacimiento: </label>
+				{{formulario.fecha_nacimiento}}
+		    </div>
+		    <div class="large-6 columns">
+		      	<label for="id_telefono">Teléfono: <small>Obligatorio</small></label>
+				{{formulario.telefono}}
+		    </div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_identidad">Correo electrónico: <small>Obligatorio</small></label>
+				{{formulario.email}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+		      	<label for="id_tipo_persona">Tipo de usuario: <small>Obligatorio</small></label>
+				{{formulario.tipo_persona}}
+		    </div>
+		</div>
+		<div class="row" id="div_departamentos_asignados">
+			<div class="large-12 columns">
+		      	<label for="id_departamentos">Departamentos asignados: <small>Obligatorio</small></label>
+				{{formulario.departamentos_asignados}}
+		    </div>
+		</div></br>
+		
+		
+		<div class="row" id="div_organizacion">
+			<div class="large-12 columns">
+		      	<label for="id_organizacion">Organización a la que pertenece: </label>
+				{{formulario.organizacion}}
+		    </div>
+		</div>
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<button type="reset" class="button small "><i class="icon-ban-circle"></i> Cancelar</button>
+				<button type="submit" class="button small"><i class="icon-save"></i> Guardar y nuevo</button>
+			</div>
+		
+		</div>
+	</form>
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		jQuery(function($){
+						        $.datepicker.regional['es'] = {
+						                closeText: 'Cerrar',
+						                prevText: '&#x3c;Ant',
+						                nextText: 'Sig&#x3e;',
+						                currentText: 'Hoy',
+						                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+						                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+						                monthNamesShort: ['Ene','Feb','Mar','Abr','May','Jun',
+						                'Jul','Ago','Sep','Oct','Nov','Dic'],
+						                dayNames: ['Domingo','Lunes','Martes','Mi&eacute;rcoles','Jueves','Viernes','S&aacute;bado'],
+						                dayNamesShort: ['Dom','Lun','Mar','Mi&eacute;','Juv','Vie','S&aacute;b'],
+						                dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','S&aacute;'],
+						                weekHeader: 'Sm',
+						                dateFormat: 'yy-mm-dd',
+						                yearRange: "c-70:c+0",
+						                changeMonth: true,
+      									changeYear: true,
+						                firstDay: 1,
+						                isRTL: false,
+						                showMonthAfterYear: true,
+						                };
+						        $.datepicker.setDefaults($.datepicker.regional['es']);
+						});
+		$(document).ready(function(){
+			$("#id_municipio").empty();
+			$("#id_departamentos_asignados").chosen();
+			$('.default').attr('style','width: 160px; height: 30px;');
+			$("#id_municipio").append("<option value=''>----------</option>");
+			$("#id_aldea").empty();
+			$("#id_aldea").append("<option value=''>----------</option>");
+			$("#id_departament").attr("required",'required')
+			$("#id_municipio").attr("required",'required')
+			$("#id_fecha_nacimiento").attr("class",'date-picker')
+			$("#id_tipo_persona option[value="+ 1 +"]").attr("selected",true);
+
+			$('.date-picker').datepicker();
+
+			$("#id_identidad").attr({
+				required: 'required',
+				pattern: '[0-9]{13}',
+				title: 'El número de identidad debe ser de 13 dígitos.' 
+			})
+			$("#id_primer_nombre").attr({
+				required: 'required',
+			})
+
+			$("#id_primer_apellido").attr({
+				required: 'required',
+			})
+
+			$("#id_segundo_apellido").attr({
+				required: 'required',
+			})
+
+			$("#id_fecha_nacimiento").attr({
+				pattern: '[0-9]{4}[\-]{1}[0-9]{2}[\-]{1}[0-9]{2}',
+				title: 'La fecha formato inválido. Ingrese aaa-mm-dd.' 
+			})
+
+			$("#id_telefono").attr({
+				required: 'required',
+				pattern: '[2|3|8|9][0-9]{7}',
+				title: 'El número de teléfono tiene un formato inválido.' 
+			})
+
+			$("#id_organizacion").attr({
+				required: 'required',
+				pattern: '[A-Z\\s]{3,255}',
+				title: 'La organizacion debe escribirse en MAYÚSCULAS y solo se permiten letras y espacios.' 
+			})
+
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+
+			$("#id_departament").on('change',function(){
+				$("#id_municipio").empty();
+				$("#id_aldea").empty();
+				$("#id_municipio").append("<option value=''>----------</option>");
+				$("#id_aldea").append("<option value=''>----------</option>");
+				$.ajax({
+					type: "GET",
+					data:
+						{
+							bandera: 'd',
+							id: $(this).val()
+						},
+					url: "{% url 'vista_ajax_municipio' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, val)
+						{
+							$("#id_municipio").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+						});
+					}
+				});
+			})
+
+			$("#id_municipio").on('change',function(){
+				$("#id_aldea").empty();
+				$("#id_aldea").append("<option value=''>----------</option>");
+				$.ajax({
+					type: "GET",
+					data:
+						{
+							bandera: 'm',
+							id: $(this).val()
+						},
+					url: "{% url 'vista_ajax_municipio' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, val)
+						{
+							$("#id_aldea").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+						});
+					}
+				});
+
+			})
+
+			$("#id_aldea").on('change',function(){
+				if ($.isEmptyObject($(this).val())){
+					$.ajax({
+						type: "GET",
+						data:
+							{
+								bandera: 'cm',
+								id: $("#id_municipio").val()
+							},
+						url: "{% url 'vista_ajax_municipio' %}",
+						success: function(msg)
+						{
+							$.each(msg, function(key, val)
+							{
+								$("#id_centros").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre +  ' | ' + val.nivel + "</option>");
+							});
+						}
+					});
+				}else{
+					$.ajax({
+						type: "GET",
+						data:
+							{
+								bandera: 'ca',
+								id: $(this).val()
+							},
+						url: "{% url 'vista_ajax_municipio' %}",
+						success: function(msg)
+						{
+							$.each(msg, function(key, val)
+							{
+								$("#id_centros").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre +  ' | ' + val.nivel + "</option>");
+							});
+
+						}
+					});
+				}
+			})
+
+			$("#id_tipo_persona").on('change',function(){
+				if($("#id_tipo_persona").val()==4){
+					for (i=0; i < document.getElementById('id_departamentos_asignados').options.length; i++){ 
+						document.getElementById('id_departamentos_asignados').options[i].selected = false; 
+					} 
+					$("#id_departamentos_asignados").trigger("chosen:updated");
+					for (i=0; i < document.getElementById('id_organizacion').options.length; i++){ 
+						document.getElementById('id_organizacion').options[i].selected = false; 
+					} 
+					$("#div_organizacion").hide()
+					$("#div_departamentos_asignados").hide()
+					$("#id_organizacion").attr('hidden', 'true')
+					$("#id_departamentos_asignados").attr('hidden', 'true')
+					$("#id_organizacion").removeAttr('required')
+				}else{
+					$("#div_organizacion").show()
+					$("#div_departamentos_asignados").show()
+					$("#id_organizacion").removeAttr('hidden')
+					$("#id_departamentos_asignados").removeAttr('hidden')
+					$("#id_organizacion").attr('required', 'required')
+				}	
+			});
+
+		});
+	
+	</script>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Editar voluntario</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+	
+	<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_identidad">Identidad: <small>Obligatorio</small></label>
+				<input type="text" id="id_identidad" name="identidad" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_primer_nombre">Primer nombre: <small>Obligatorio</small></label>
+				<input type="text" id="id_primer_nombre" name="primer_nombre" />
+			</div>
+			<div class="large-6 columns">
+				<label for="id_primer_apellido">Primer apellido: <small>Obligatorio</small></label>
+				<input type="text" id="id_primer_apellido" name="primer_apellido" />
+			</div>
+		</div>
+		
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<button type="reset" class="button small "><i class="icon-ban-circle"></i> Limpiar</button>
+				<button type="submit" class="button small"><i class="icon-search"></i> Buscar</button>
+			</div>
+		
+		</div>
+	</form>
+
+	<div class="row">
+		
+			<div class="large-12 columns">
+				<table>
+				  <thead>
+				    <tr>
+				      <th width="100">Identidad</th>
+				      <th>Nombre</th>
+				      <th width="150">Telefono</th>
+				      <th width="150">Estado</th>
+				      <th></th>
+				    </tr>
+				  </thead>
+				  <tbody>
+				  {% for p in personas %}
+				    <tr>
+				      <td>{{p.identidad}}</td>
+				      <td>{{p.nombre_completo}}</td>
+				      <td>{{p.telefono}}</td>
+				      <td>{% if p.activo == True %} <span class="success label" >Activo</span> {% else %} <span class="alert label" > Inactivo</span> {% endif %}</td>
+				      <td><a href="{% url 'vista_editar_voluntario' p.pk %}"><i class="icon-edit"> Editar</i></a></td>
+				    </tr>
+				  {% empty %}
+				  	<tr><td colspan="4">Ingrese los parámetros de búsqueda.</td></tr>
+				  {% endfor %}
+				  </tbody>
+				</table>
+			</div>
+		
+		</div>
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		
+		$(document).ready(function(){
+			
+
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+
+			
+		});
+	
+	</script>
+{% endblock %}
