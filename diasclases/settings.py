@@ -38,6 +38,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'diasclases.general',
     'diasclases.monitoreo',
+    'diasclases.monitoreo.templatetags',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -47,6 +49,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 )
 
 TEMPLATE_DIRS = (
@@ -56,9 +60,18 @@ TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), 'medios/plantillas'),
 )
 
+
+
 ROOT_URLCONF = 'diasclases.urls'
 
+CORS_ORIGIN_ALLOW_ALL = True
+
 WSGI_APPLICATION = 'diasclases.wsgi.application'
+
+CORS_ALLOW_METHODS = (
+        'GET',
+        'Post'
+    )
 
 
 # Database
@@ -67,7 +80,7 @@ WSGI_APPLICATION = 'diasclases.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'diasclases',                      # Or path to database file if using sqlite3.
+        'NAME': 'diasclases2',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'postgres',
         'PASSWORD': 'postgres',
@@ -75,6 +88,18 @@ DATABASES = {
         'PORT': '5433',                      # Set to empty string for default.
     },
 }
+
+"""DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'diasclases',                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': 'transformemoz01',
+        'PASSWORD': 'tR@nsformemos.hN',
+        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                      # Set to empty string for default.
+    },
+}"""
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -97,3 +122,11 @@ MEDIA_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), 'medios/')
 MEDIA_URL = '/medios/'
 
 STATIC_URL = '/static/'
+
+
+#configuracion de server de correo
+EMAIL_HOST = 'smtp.webfaction.com'
+EMAIL_HOST_USER = 'diasclase'
+EMAIL_HOST_PASSWORD = '12345678'
+DEFAULT_FROM_EMAIL = 'monitoreodiasclase@transhonduras.com'
+SERVER_EMAIL = 'monitoreodiasclase@transhonduras.com'

@@ -1,0 +1,117 @@
+{% extends "base_monitoreo.html" %}
+
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Borrar semana del calendario</a></li>
+	</ul>
+{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+		function borrar(semana_id, numero_semana){
+			link="{% url 'vista_ajax_eliminar_semanacalendario' 0 %}".replace('/0','/'+semana_id)
+			if (confirm("¿Está seguro que desea borrar la semana numero "+numero_semana+" del calendario?")){
+				$.ajax({
+					type: "GET",
+					url: link,
+					success: function(msg)
+					{
+						if (msg==1){
+							$.gritter.add({
+									title: '¡Éxito!',
+									text: 'La semana '+ numero_semana +' ha sido borrada satisfactoriamente. Actualice la página para ver los cambios.',
+									sticky: false,
+									time: '3000',
+									class_name: 'gritter-success gritter-center'
+							});
+						}else{
+							$.gritter.add({
+									title: '¡Falló!',
+									text: 'La semana no se pudo eliminar, pueda que no tenga los permisos para hacerlo.',
+									sticky: false,
+									time: '15000',
+									class_name: 'gritter-error gritter-right'
+							});
+						}
+					},
+					error: function(msg)
+					{
+						alert("Error al intentar borrar la semana del calendario.")
+					}
+				});
+			}
+		};
+	</script>
+{% endblock %}
+
+{% block content %}
+<div class="large-12 columns">
+		
+				
+				<div data-alert class="alert-box info radius">
+				  <h3>Calendario académico {{anio}}</h3>
+				  Este listado continene únicamente las semanas que ningún centro ha reportado todavía, es decir si almenos un centro hizó un reporte en determinada semana ésta no se mostrará en este listado.
+				</div>
+		
+		</div>
+<div class="large-12 columns">
+		  <div class="content" id="panel2-2">
+		    <table id="semanas">
+			  <thead>
+			    <tr>
+			      <th width="30">Núm. semana</th>
+			      <th>Fecha Inicio</th>
+			      <th>Fecha Finalización</th>
+			      {% if perms.monitoreo.delete_calendario_academico %}
+			      <th></th>
+			      {% endif %}
+			    </tr>
+			  </thead>
+			  <tbody>
+			  {% for r in calendario %}
+			    <tr>
+			      <td>{{r.numero_semana}}</td>
+			      <td>{{r.fecha_inicio|date:"l d F Y"}}</td>
+			      <td>{{r.fecha_fin|date:"l d F Y"}}</td>
+			      {% if perms.monitoreo.delete_calendario_academico %}
+			      <td><a href="javascript:borrar({{r.pk}}, {{r.numero_semana}})"><i class="icon-trash"></i> Borrar del calendario</a></td>
+			      {% endif %}
+			    </tr>
+			  {% empty %}
+			  	<tr><td colspan="3"><p>No semanas ingresadas en calendario actual.</p></td>
+			  	</tr>
+			  {% endfor %}
+			  </tbody>
+			</table>
+		  </div>
+		  
+</div>
+
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+	{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'La semana fue eliminada satisfactoriamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+	{% endif %}
+
+</script>
+{% endblock %}

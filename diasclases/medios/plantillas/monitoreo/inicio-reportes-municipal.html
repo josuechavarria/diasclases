@@ -1,0 +1,337 @@
+{% extends "base_reportes.html" %}
+
+{% block extracss %}
+	
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/jquery.multiselect.css" />
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/style.css" />
+
+	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/dataTables.colVis.css">
+
+	
+{% endblock %}
+
+{% block content %}
+	<form method="POST" id="frm_reportes" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+			{{ formulario.non_field_errors }}
+			{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+			{% csrf_token %}
+			<br/>
+			<div class="large-12 columns">
+				<div class="large-4 columns">
+					&nbsp;
+				</div>
+				<div class="large-4 columns">
+					<label for="id_periodo"><b>Elija el período:</b> <small>Obligatorio</small></label>
+					<select id="id_periodo" name="periodo">
+						{% for a in anio %}
+						<option value="{{a.anio}}">{{a.anio}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="large-4 columns">
+					&nbsp;
+				</div>
+			</div>	
+			<div class="large-12 columns">
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				<div class="large-3 columns">
+					<label for="id_departamento">Departamento: </label>
+					<select id="id_departamento" name="departamento" multiple="multiple">
+						{% for d in departamentos %}
+							<option value="{{d.pk}}">{{d.codigo_departamento}} | {{d.descripcion}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				<div class="large-4 columns">
+					<label for="id_municipio">Municipio: </label>
+					<select id="id_municipio" name="municipio" multiple="multiple">
+
+					</select>
+				</div>
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				<div class="large-2 columns"><br/>
+					<a href="javascript:push_array();" id="id_buscar" class="button tiny"><i class="fi-filter"></i> Agregar filtro</a>
+				</div>
+				
+			</div>	
+			<div class="large-12 columns">
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				<div class="large-10 columns" id="label_filtros">
+					
+				</div>
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				
+			</div>
+			
+			<div class="large-12 columns">
+			<br/><br/>
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				<div class="large-2 columns">
+					<label for="id_percent"><input type="checkbox" checked="true" id="id_percent" name="percent"> Ver porcentajes </label>
+				</div>
+				<div class="large-2 columns">
+					<label for="id_columnas"><input type="checkbox" id="id_columnas" name="columnas"> Gráfico columnas </label>
+				</div>
+				<div class="large-7 columns">
+					&nbsp;
+				</div>
+				
+			</div>	
+		
+		</form>	
+	
+	
+{% endblock %}
+
+{% block resultado %}
+<br/><br/>
+<div class="large-12 columns">
+	<div id="grafica"><div class="large-12 columns" id="container" style="min-height: 620px;"></div></div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/dataTables.colVis.js"></script>
+
+	<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/multiwidget/src/jquery.multiselect.js"></script>
+	<script type="text/javascript">
+		var array_munis = [];
+		var stacking="percent"
+		var tipo="bar"
+		var texto="Porcentaje dias clases"
+		function push_array(){
+			//alert($("#id_municipio option[value="+ 1 +"]").text());
+			var munis=$("#id_municipio").val()
+			for ( var i = 0; i < munis.length; i = i + 1 ) {
+			    //alert(munis[i])
+			    
+			    var existe = false;
+			    for ( var j = 0; j < array_munis.length; j = j + 1 ) {
+				   if (array_munis[j]==munis[i]){
+				   		existe = true;
+				   }
+				}
+				if (existe==false){
+					array_munis.push(munis[i])
+					$("#label_filtros").append('<span id="span_'+munis[i]+'"class="label secondary"><a style="color: black;" class="close" title="Borrar este filtro" href="javascript:splice_array('+munis[i]+')">'+$("#id_departamento option:selected").text()+' - '+$("#id_municipio option[value="+ munis[i] +"]").text()+'&nbsp; &times;</a></span>&nbsp;&nbsp;')
+					
+				}
+			}
+			refrescar_grafico();
+
+			//alert(array_munis)
+		}
+
+		function splice_array(municipio_id){
+			for ( var j = 0; j < array_munis.length; j = j + 1 ) {
+				if (array_munis[j]==municipio_id){
+				   	array_munis.splice(j,1)
+				   	$("#span_"+municipio_id).remove()
+				   	refrescar_grafico();
+				}
+			}
+			//alert(array_munis)
+		}
+
+		function refrescar_grafico(){
+			$.ajax({
+					type: "POST",
+					data: {csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(), periodo: $("#id_periodo").val(), municipio: array_munis},
+					url: "{% url 'vista_reporte_municipal' %}",
+					success: function(msg)
+					{
+						if (tipo=="column"){
+							Highcharts.setOptions({
+								chart: {
+						            type: tipo
+						        },
+						        yAxis: {
+						            min: 0,
+						            title: {
+						                text: texto
+						            }
+						        },
+					            plotOptions: {
+					                column: {
+					                    stacking: stacking
+					                }
+					            }
+					        });
+						}
+						if (tipo=="bar"){
+							Highcharts.setOptions({
+								chart: {
+						            type: tipo
+						        },
+						        yAxis: {
+						            min: 0,
+						            title: {
+						                text: texto
+						            }
+						        },
+					            plotOptions: {
+					                bar: {
+					                    stacking: stacking
+					                }
+					            }
+					        });
+						}
+						
+						$("#grafica").html(msg)
+
+					}
+			});
+		}
+
+		$(document).ready(function(){
+
+			$("#id_periodo").on("change", function(e){
+				refrescar_grafico();
+			})
+
+			$("#id_municipio").multiselect({
+				selectedList: 4
+			})
+
+			$("#id_percent").click(function() {  
+		        if($("#id_percent").is(':checked')) {  
+		            stacking="percent"
+		            texto="Porcentaje dias clases"
+		        } else {  
+		            stacking=""
+		            texto="Total dias clases"
+		        }  
+		        refrescar_grafico();
+		    }); 
+
+		    $("#id_columnas").click(function() {  
+		        if($("#id_columnas").is(':checked')) {  
+		            tipo="column"
+		        } else {  
+		            tipo="bar"
+		        } 
+		        refrescar_grafico();
+		    });
+
+
+			$("#id_departamento").multiselect({
+				multiple: false,
+			   header: "Seleccione una opción",
+			   noneSelectedText: "Seleccione una opción",
+			   selectedList: 1,
+
+				click: function(event, ui){
+			       if( $(this).multiselect("widget").find("input:checked").length > 1 || $(this).multiselect("widget").find("input:checked").length == 0){
+			           $("#id_municipio").multiselect("disable");
+			           if ($(this).multiselect("widget").find("input:checked").length == 0){
+			           		$(".ui-multiselect.ui-widget.ui-state-default.ui-corner-all.ui-state-active").find("span").text("Seleccionar departamento");
+			           		$("#id_municipio").multiselect("disable");
+			           }
+			       } else {
+			           $("#id_municipio").multiselect("enable");
+			    	}
+			    },
+			     checkAll: function(){
+				      $("#id_municipio").multiselect("disable");
+				      $(".ui-multiselect.ui-widget.ui-state-default.ui-corner-all.ui-state-active").find("span").text("Seleccionar departamento");
+				   },
+			    uncheckAll: function(){
+					$("#id_municipio").multiselect("disable");
+					$(".ui-multiselect.ui-widget.ui-state-default.ui-corner-all.ui-state-active").find("span").text("Seleccionar departamento");
+				     
+				   }
+				
+			});
+
+			$("#id_departamento").on('change',function(){
+				$("#id_municipio").empty();
+				if (!$.isEmptyObject($(this).val())){
+					$.ajax({
+						type: "GET",
+						data:
+							{
+								bandera: 'd',
+								id: $(this).val()[0]
+							},
+						url: "{% url 'vista_ajax_municipio' %}",
+						success: function(msg)
+						{
+							$.each(msg, function(key, val)
+							{
+								$("#id_municipio").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+								$("#id_municipio").multiselect('refresh');
+							});
+						}
+					});
+				}
+			})
+			
+		})
+	
+	$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: 'Dias clases por municipio año {{periodo}}'
+        },
+        xAxis: {
+            categories: [
+            	{% for d in data %}
+            		'{{d.departamento}} - <b>{{d.municipio}}</b>',
+            	{% endfor %}
+            ]
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Porcentaje dias clases'
+            }
+        },
+        tooltip: {
+            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+            shared: true
+        },
+        plotOptions: {
+            bar: {
+                stacking: 'percent'
+            }
+        },
+        series: [{
+            name: 'Si hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_si}},
+            	{% endfor %}
+            ]
+        }, {
+            name: 'No hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_no}},
+            	{% endfor %}
+            ]
+        }
+        ]
+    });
+});
+	    
+	</script>
+{% endblock %}

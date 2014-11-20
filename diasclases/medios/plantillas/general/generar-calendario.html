@@ -1,0 +1,162 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li class="unavailable"><a href="#">Generar calendario académico</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+	
+	<form method="POST" id="frm_boleta" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+		<div class="row">
+		<h4>Fechas de inicio y fin del año escolar</h4>
+			<div class="large-6 columns">
+				<label for="id_fecha_inicio_anio">Fecha inicio de año: <small>Obligatorio</small></label>
+				<input type="date" id="id_fecha_inicio_anio" name="fecha_inicio_anio" required="required" >
+			</div>
+			<div class="large-6 columns">
+				<label for="id_fecha_fin_anio">Fecha fin de año: <small>Obligatorio</small></label>
+				<input type="date" id="id_fecha_fin_anio" name="fecha_fin_anio" required="required" />
+			</div>
+		</div>
+		<div class="row">
+<div data-alert class="alert-box secondary radius ">
+		<div class="row">
+			
+			
+			<h4>Fechas de inicio y fin de las semanas feriados</h4>
+			  <p>Ayuda: Cada fecha de inicio y fecha fin corresponde a una semana de feriado.</p>
+			
+			<div class="large-3 columns">
+				<label for="id_fecha_inicio_1">Fecha inicio: </label>
+				<input type="date" id="id_fecha_inicio_1" name="fecha_inicio_1" >
+			</div>
+			<div class="large-3 columns">
+				<label for="id_fecha_fin_1">Fecha fin: </label>
+				<input type="date" id="id_fecha_fin_1" name="fecha_fin_1" />
+			</div>
+			<div class="large-6 columns"></div>
+		</div>
+		<div class="row">
+
+			<div class="large-3 columns">
+				<label for="id_fecha_inicio_2">Fecha inicio: </label>
+				<input type="date" id="id_fecha_inicio_2" name="fecha_inicio_2" >
+			</div>
+			<div class="large-3 columns">
+				<label for="id_fecha_fin_2">Fecha fin: </label>
+				<input type="date" id="id_fecha_fin_2" name="fecha_fin_2" />
+			</div>
+			<div class="large-6 columns"></div>
+		</div>
+		<div class="row">
+
+			<div class="large-3 columns">
+				<label for="id_fecha_inicio_3">Fecha inicio: </label>
+				<input type="date" id="id_fecha_inicio_3" name="fecha_inicio_3" >
+			</div>
+			<div class="large-3 columns">
+				<label for="id_fecha_fin_3">Fecha fin: </label>
+				<input type="date" id="id_fecha_fin_3" name="fecha_fin_3" />
+			</div>
+			<div class="large-6 columns"></div>
+		</div>
+		<div class="row">
+
+			<div class="large-3 columns">
+				<label for="id_fecha_inicio_4">Fecha inicio: </label>
+				<input type="date" id="id_fecha_inicio_4" name="fecha_inicio_4" >
+			</div>
+			<div class="large-3 columns">
+				<label for="id_fecha_fin_4">Fecha fin: </label>
+				<input type="date" id="id_fecha_fin_4" name="fecha_fin_4" />
+			</div>
+			<div class="large-6 columns"></div>
+		</div>
+		<div class="row">
+
+			<div class="large-3 columns">
+				<label for="id_fecha_inicio_5">Fecha inicio: </label>
+				<input type="date" id="id_fecha_inicio_5" name="fecha_inicio_5" >
+			</div>
+			<div class="large-3 columns">
+				<label for="id_fecha_fin_5">Fecha fin: </label>
+				<input type="date" id="id_fecha_fin_5" name="fecha_fin_5" />
+			</div>
+			<div class="large-6 columns"></div>
+		</div>
+		</div>
+		</div>
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<button type="reset" class="button small "><i class="icon-ban-circle"></i> Limpiar</button>
+				<button type="submit" class="button small"><i class="icon-cogs"></i> Generar</button>
+			</div>
+		
+		</div>
+	</form>
+
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		jQuery(function($){
+						        $.datepicker.regional['es'] = {
+						                closeText: 'Cerrar',
+						                prevText: '&#x3c;Ant',
+						                nextText: 'Sig&#x3e;',
+						                currentText: 'Hoy',
+						                monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+						                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+						                monthNamesShort: ['Ene','Feb','Mar','Abr','May','Jun',
+						                'Jul','Ago','Sep','Oct','Nov','Dic'],
+						                dayNames: ['Domingo','Lunes','Martes','Mi&eacute;rcoles','Jueves','Viernes','S&aacute;bado'],
+						                dayNamesShort: ['Dom','Lun','Mar','Mi&eacute;','Juv','Vie','S&aacute;b'],
+						                dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','S&aacute;'],
+						                weekHeader: 'Sm',
+						                dateFormat: 'yy-mm-dd',
+						                yearRange: "c-0:c+0",
+						                changeMonth: true,
+      									changeYear: true,
+						                firstDay: 1,
+						                isRTL: false,
+						                showMonthAfterYear: true,
+						                };
+						        $.datepicker.setDefaults($.datepicker.regional['es']);
+						});
+		$(document).ready(function(){
+			$("input[id^=id_fecha]").attr("class",'date-picker')
+			$('.date-picker').datepicker();
+
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+
+			
+		});
+	
+	</script>
+{% endblock %}

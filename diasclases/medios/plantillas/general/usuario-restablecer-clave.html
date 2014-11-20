@@ -1,0 +1,179 @@
+{% extends "base_monitoreo.html" %}
+{% block ruta %}
+	<ul class="breadcrumbs">
+	  <li><a href="{% url 'vista_inicio' %}">Inicio</a></li>
+	  <li><a href="{% url 'vista_buscar_usuarios_restablecer' %}">Buscar usuario restablecer</a></li>
+	  <li class="unavailable"><a href="#">Restablecer contraseña</a></li>
+	</ul>
+{% endblock %}
+{% block header %}
+	<script type="text/javascript">
+		function save(){
+			if ($("#id_nueva_clave").val() == $("#id_repetir_nueva_clave").val()){
+				return true;
+			}
+			else{
+				alert("Las contraseñas no coinciden. Por favor verifique antes de continuar.")
+				return false;
+			}
+		}
+
+	</script>
+{% endblock %}
+
+{% block content %}
+	{% if exito %}
+	<div class="row">
+			<div class="large-12 columns">
+				<div data-alert class="alert-box success radius">
+				  <h4>Cambio de contraseña finalizado!</h4>
+				  El nuevo usuario y contraseña de {{persona.nombre_completo}} es:<br/>
+				  <b>Usuario: </b> {{persona.user.username}} <br/>
+				  <b>Contraseña: </b> {{nueva_clave}} <br/>
+				  <b>Privilegios de: </b> {{persona.tipo_persona}}<br/>
+				  <b>Se envió un correo electrónico a la dirección: </b> {{email}}
+				  <a href="#" class="close">&times;</a>
+				</div>
+			</div>
+	</div>
+	{% endif %}
+	
+	<form method="POST" id="frm_restablecer" onsubmit="return save();" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+		{{ formulario.non_field_errors }}
+		{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+		{% csrf_token %}
+		<div class="row">
+			<div class="large-12 columns">
+				<label for="id_identidad">Identidad: </label>
+				<input type="text" id="id_identidad" name="identidad" readonly="readonly" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_primer_nombre">Primer nombre: </label>
+				<input type="text" id="id_primer_nombre" name="primer_nombre" readonly="readonly" />
+			</div>
+			<div class="large-6 columns">
+				<label for="id_primer_apellido">Primer apellido: </label>
+				<input type="text" id="id_primer_apellido" name="primer_apellido" readonly="readonly" />
+			</div>
+		</div>
+
+		<div class="row">
+
+				<div class="large-4 columns">
+					<label for="id_nueva_clave">Nueva contraseña: <small>Obligatorio</small></label>
+					<input type="password" id="id_nueva_clave" name="nueva_clave" required="required" />
+				</div>
+				<div class="large-2 columns left">
+					<label for="id_nueva_clave">&nbsp;</label>
+					<a href="#" id="id_generar" class="button tiny secondary">Generar</a>
+				</div>
+			
+		</div>
+		<div class="row">
+			<div class="large-4 columns">
+				<label for="id_repetir_nueva_clave">Confirmar nueva contraseña: <small>Obligatorio</small></label>
+				<input type="password" id="id_repetir_nueva_clave" name="repetir_nueva_clave" required="required" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+				<label for="id_email">Enviar a este email: <small>Opcional</small></label>
+				<input type="email" id="id_email" name="email" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="large-12 columns">
+				 <input type="checkbox" id="show"/> <label for="show">Mostrar contraseña</label><br/><br/>
+			</div>
+		</div>
+		
+		<div class="row">
+		
+			<div class="large-12 columns">
+				<a href="{% url 'vista_buscar_usuarios_restablecer' %}" class="button small "><i class="icon-arrow-left"></i> Atras</a>
+				<button type="submit" class="button small"><i class="icon-refresh"></i> Restablecer</button>
+			</div>
+		
+		</div>
+	</form>
+
+{% endblock %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		
+		$(document).ready(function(){
+			
+			$("#id_identidad").val({{persona.identidad}})
+			$("#id_primer_nombre").val("{{persona.primer_nombre}}")
+			$("#id_primer_apellido").val("{{persona.primer_apellido}}")
+			$("#id_email").val("{{persona.email}}")
+			{% if exito %}
+				$.gritter.add({
+						title: '¡Éxito!',
+						text: 'Su información ha sido almacenada exitosamente.',
+						sticky: false,
+						time: '3000',
+						class_name: 'gritter-success gritter-center'
+				});
+			{% endif %}
+			{% if error %}
+				$.gritter.add({
+						title: '¡Falló!',
+						text: 'Ocurrió un error al guardar los datos, por favor revise la información digitada.</ br>{% autoescape off %}{{errores}} {% endautoescape %}',
+						sticky: false,
+						time: '15000',
+						class_name: 'gritter-error gritter-right'
+				});
+			{% endif %}
+
+			$('#show').attr('checked', false);
+	 
+			$('#show').click(function(){
+			 
+			      name = "nueva_clave"
+			      value = $('#id_nueva_clave').val();
+			      name2 = "repetir_nueva_clave"
+			      value2 = $('#id_repetir_nueva_clave').val();
+			      if($(this).is(':checked'))
+			      {
+			         html = '<input type="text" name="'+ name + '" value="' + value + '" id="id_nueva_clave"/>';
+			         $('#id_nueva_clave').after(html).remove();
+			         html = '<input type="text" name="'+ name2 + '" value="' + value2 + '" id="id_repetir_nueva_clave"/>';
+			         $('#id_repetir_nueva_clave').after(html).remove();
+			      }
+			      else
+			      {
+			         html = '<input type="password" name="'+ name + '" value="' + value + '" id="id_nueva_clave"/>';
+			         $('#id_nueva_clave').after(html).remove();
+			         html = '<input type="password" name="'+ name2 + '" value="' + value2 + '" id="id_repetir_nueva_clave"/>';
+			         $('#id_repetir_nueva_clave').after(html).remove();
+			      }
+		  	 });
+
+			$("#id_generar").on('click',function(){
+				$.ajax({
+					type: "GET",
+					url: "{% url 'vista_ajax_generar' %}",
+					success: function(msg)
+					{
+						$.each(msg, function(key, val)
+						{
+							$("#id_nueva_clave").val(val.clave)
+							$("#id_repetir_nueva_clave").val(val.clave)
+						});
+					},
+					error: function(jqXHR, textStatus)
+					{
+						alert("Error al generar la nueva contraseña")
+					}
+				});
+			})
+
+			
+		});
+	
+	</script>
+{% endblock %}
