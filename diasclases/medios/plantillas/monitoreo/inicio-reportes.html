@@ -6,19 +6,20 @@
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/style.css" />
 
 	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/dataTables.colVis.css">
 
 	
 {% endblock %}
 
 {% block content %}
 	
-		<br/><br/><br/><h4 class="site-title">Filtros para la búsqueda de información </h4>
+		<br/><br/><h4 class="site-title">Filtros para la búsqueda de información </h4>
 		<form method="POST" id="frm_reportes" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
 			{{ formulario.non_field_errors }}
 			{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
 			{% csrf_token %}
 			<div class="large-12 columns">
-				<div class="large-3 columns">
+				<div class="large-4 columns">
 					<label for="id_periodo">Elija el(los) períodos: <small>Obligatorio</small></label>
 					<select id="id_periodo" name="periodo" multiple="multiple">
 						{% for a in anio %}
@@ -26,12 +27,12 @@
 						{% endfor %}
 					</select>
 				</div>
-				<div class="large-9 columns">
+				<div class="large-8 columns">
 					&nbsp;
 				</div>
 			</div>
 			<div class="large-12 columns">
-				<div class="large-3 columns">
+				<div class="large-4 columns">
 					<label for="id_departamento">Departamento: </label>
 					<select id="id_departamento" name="departamento" multiple="multiple">
 						{% for d in departamentos %}
@@ -39,18 +40,41 @@
 						{% endfor %}
 					</select>
 				</div>
-				<div class="large-9 columns">
+				<div class="large-1 columns">
 					&nbsp;
 				</div>
-			</div>
-			<div class="large-12 columns">
-				<div class="large-3 columns">
+				<div class="large-4 columns">
 					<label for="id_municipio">Municipio: </label>
 					<select id="id_municipio" name="municipio" multiple="multiple">
 
 					</select>
 				</div>
-				<div class="large-9 columns">
+				<div class="large-3 columns">
+					&nbsp;
+				</div>
+				
+			</div>
+			<div class="large-12 columns">
+				<div class="large-4 columns">
+					<label for="id_tipo_centro">Tipo de centro: </label>
+					<select id="id_tipo_centro" name="tipo_centro" multiple="multiple">
+						<option value="UNIDOCENTE" selected="selected">UNIDOCENTE</option>
+						<option value="BIDOCENTE" selected="selected">BIDOCENTE</option>
+						<option value="MULTIDOCENTE" selected="selected">MULTIDOCENTE</option>
+					</select>
+				</div>
+				<div class="large-1 columns">
+					&nbsp;
+				</div>
+				<div class="large-4 columns">
+					<label for="id_nivel">Niveles: </label>
+					<select id="id_nivel" name="nivel" multiple="multiple">
+						<option value="Educación Pre-Basica" selected="selected">Educación Pre-Basica</option>
+						<option value="Educación Basica" selected="selected">Educación Basica</option>
+						<option value="Educación Media" selected="selected">Educación Media</option>
+					</select>
+				</div>
+				<div class="large-3 columns">
 					&nbsp;
 				</div>
 			</div>
@@ -58,12 +82,12 @@
 				<div class="large-8 columns">
 				<label>Agrupar por:</label>
 				
-					<input id="id_agrupar_3" type="checkbox" checked="true" value=", muni.codigo_municipio, muni.descripcion as municipio" name="agrupar"><label for="id_agrupar_3"><b>Municipio</b></label></input>
-					<input id="id_agrupar_4" type="checkbox" checked="true" value=", ce.codigo, ce.nombre" name="agrupar"><label for="id_agrupar_4"><b>Centro educativo</b></label></input>
+					<input id="id_agrupar_3" type="checkbox" checked="true" value=", codigo_municipio, municipio" name="agrupar"><label for="id_agrupar_3"><b>Municipio</b></label></input>
+					<input id="id_agrupar_4" type="checkbox" checked="true" value=", codigo, nombre" name="agrupar"><label for="id_agrupar_4"><b>Centro educativo</b></label></input>
 
-					<input id="id_agrupar_0" type="checkbox" value=", ce.nivel" name="agrupar"><label for="id_agrupar_0"><b>Nivel educativo</b></label></input>
-					<input id="id_agrupar_1" type="checkbox" value=", ce.tipo_docente as tipo_centro" name="agrupar"><label for="id_agrupar_1"><b>Tipo de centro</b></label></input>
-					<input id="id_agrupar_2" type="checkbox" value=", j.descripcion as jornada" name="agrupar"><label for="id_agrupar_2"><b>Jornada</b></label></input>
+					<input id="id_agrupar_0" type="checkbox" value=", nivel" name="agrupar"><label for="id_agrupar_0"><b>Nivel educativo</b></label></input>
+					<input id="id_agrupar_1" type="checkbox" value=", tipo_docente as tipo_centro" name="agrupar"><label for="id_agrupar_1"><b>Tipo de centro</b></label></input>
+					<input id="id_agrupar_2" type="checkbox" value=", jornada" name="agrupar"><label for="id_agrupar_2"><b>Jornada</b></label></input>
 				</div>
 				<div class="large-4 columns">
 					&nbsp;
@@ -84,7 +108,7 @@
 			
 			<div class="large-12 columns">
 					<button type="reset" class="button tiny "><i class="icon-ban-circle"></i> Limpiar</button>
-					<a href="#" id="id_buscar" class="button tiny"><i class="icon-search"></i> Buscar</a>
+					<a href="#info_tabla" id="id_buscar" class="button tiny"><i class="icon-search"></i> Buscar</a>
 				</div>
 		
 		</form>
@@ -94,6 +118,8 @@
 {% block resultado %}
 <div class="large-12 columns">
 <!--<i class="fi-results size-21">  Resultados</i>-->
+	<div id="info_tabla2">
+	</div>
 	<div id="info_tabla">
 	<table id="reporte" width="100%">
 	<caption>Listado de Centros</caption>
@@ -106,6 +132,7 @@
 	      <th>Municipio</th>
 	      <th >Codigo</th>
 	      <th>Nombre</th>
+	      <th>Centros</th>
 	      <th >Hubo Clases</th>
 	      <th >No Hubo Clases</th>
 	    </tr>
@@ -120,6 +147,7 @@
 {% block extrajs %}
 
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/dataTables.colVis.js"></script>
 
 	<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/multiwidget/src/jquery.multiselect.js"></script>
 	<script type="text/javascript">
@@ -132,6 +160,28 @@
 				selectedList: 4
 			})
 
+			$("#id_tipo_centro").multiselect({
+				selectedList: 4
+			})
+
+			$("#id_nivel").multiselect({
+				selectedList: 4
+			})
+
+			$("input[name=agrupar]").on("click", function(e){
+				$.ajax({
+					type: "POST",
+					data: $("#frm_reportes").serialize(),
+					url: "{% url 'vista_inicio_reportes' %}",
+					success: function(msg)
+					{
+						//alert(msg)
+						$("#info_tabla").html(msg)
+
+					}
+				});
+			})
+
 			$("#id_departamento").multiselect({
 				selectedList: 4,
 				click: function(event, ui){
@@ -139,34 +189,47 @@
 			           $("#id_municipio").multiselect("disable");
 			           if ($(this).multiselect("widget").find("input:checked").length == 0){
 			           		$(".ui-multiselect.ui-widget.ui-state-default.ui-corner-all.ui-state-active").find("span").text("Seleccionar departamento");
+			           		$("#id_municipio").multiselect("disable");
 			           }
 			       } else {
 			           $("#id_municipio").multiselect("enable");
 			    	}
-			    }
+			    },
+			     checkAll: function(){
+				      $("#id_municipio").multiselect("disable");
+				      $(".ui-multiselect.ui-widget.ui-state-default.ui-corner-all.ui-state-active").find("span").text("Seleccionar departamento");
+				   },
+			    uncheckAll: function(){
+					$("#id_municipio").multiselect("disable");
+					$(".ui-multiselect.ui-widget.ui-state-default.ui-corner-all.ui-state-active").find("span").text("Seleccionar departamento");
+				     
+				   }
+				
 			});
 			
 		})
 
 		$("#id_departamento").on('change',function(){
 				$("#id_municipio").empty();
-				$.ajax({
-					type: "GET",
-					data:
+				if (!$.isEmptyObject($(this).val())){
+					$.ajax({
+						type: "GET",
+						data:
+							{
+								bandera: 'd',
+								id: $(this).val()[0]
+							},
+						url: "{% url 'vista_ajax_municipio' %}",
+						success: function(msg)
 						{
-							bandera: 'd',
-							id: $(this).val()[0]
-						},
-					url: "{% url 'vista_ajax_municipio' %}",
-					success: function(msg)
-					{
-						$.each(msg, function(key, val)
-						{
-							$("#id_municipio").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
-							$("#id_municipio").multiselect('refresh');
-						});
-					}
-				});
+							$.each(msg, function(key, val)
+							{
+								$("#id_municipio").append("<option value="+ val.pk  +">" + '' + val.codigo + ' | ' + val.nombre + "</option>");
+								$("#id_municipio").multiselect('refresh');
+							});
+						}
+					});
+				}
 		})
 
 		$.extend($.fn.dataTable.defaults, {

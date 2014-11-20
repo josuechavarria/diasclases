@@ -1,0 +1,125 @@
+{% extends "base_reportes.html" %}
+
+{% block extracss %}
+	
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/jquery.multiselect.css" />
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/style.css" />
+
+	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/dataTables.colVis.css">
+
+	
+{% endblock %}
+
+{% block content %}
+	<form method="POST" id="frm_reportes" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+			{{ formulario.non_field_errors }}
+			{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+			{% csrf_token %}
+			<br/>
+			<div class="large-12 columns">
+				<div class="large-4 columns">
+					&nbsp;
+				</div>
+				<div class="large-4 columns">
+					<label for="id_periodo"><b>Elija el período:</b> <small>Obligatorio</small></label>
+					<select id="id_periodo" name="periodo">
+						<option value="">----------------</option>
+						{% for a in anio %}
+						<option value="{{a.anio}}">{{a.anio}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="large-4 columns">
+					&nbsp;
+				</div>
+			</div>			
+		
+		</form>	
+	
+	
+{% endblock %}
+
+{% block resultado %}
+<div class="large-12 columns">
+	<div id="grafica"><div class="large-12 columns" id="container" style="min-height: 500px;"></div></div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/dataTables.colVis.js"></script>
+
+	<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/multiwidget/src/jquery.multiselect.js"></script>
+	<script type="text/javascript">
+
+		$(document).ready(function(){
+
+			$("#id_periodo").on("change", function(e){
+				$.ajax({
+					type: "POST",
+					data: $("#frm_reportes").serialize(),
+					url: "{% url 'vista_reporte_nacional' %}",
+					success: function(msg)
+					{
+						//alert(msg)
+						$("#grafica").html(msg)
+
+					}
+				});
+			})
+			
+		})
+	
+	$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Dias clases por departamento año {{periodo}}'
+        },
+        xAxis: {
+            categories: [
+            	{% for d in data %}
+            		'{{d.descripcion}}',
+            	{% endfor %}
+            ]
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Total dias clases'
+            }
+        },
+        tooltip: {
+            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+            shared: true
+        },
+        plotOptions: {
+            column: {
+                stacking: 'percent'
+            }
+        },
+        series: [{
+            name: 'Si hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_si}},
+            	{% endfor %}
+            ]
+        }, {
+            name: 'No hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_no}},
+            	{% endfor %}
+            ]
+        }
+        ]
+    });
+});
+	    
+	</script>
+{% endblock %}

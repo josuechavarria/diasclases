@@ -1,0 +1,54 @@
+
+<div class="large-12 columns" id="container" style="min-height: 500px;"></div>
+
+<script type="text/javascript">
+	$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Dias clases por departamento año {{periodo}}'
+        },
+        xAxis: {
+            categories: [
+            	{% for d in data %}
+            		'{{d.descripcion}}',
+            	{% endfor %}
+            ]
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Total dias clases'
+            }
+        },
+        tooltip: {
+            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+            shared: true
+        },
+        plotOptions: {
+            column: {
+                stacking: 'percent'
+            }
+        },
+        series: [{
+            name: 'Si hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_si}},
+            	{% endfor %}
+            ]
+        }, {
+            name: 'No hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_no}},
+            	{% endfor %}
+            ]
+        }
+        ]
+	    });
+	});
+
+</script>

@@ -1,0 +1,42 @@
+
+<div class="large-12 columns" id="container" style="min-height: 620px;"></div>
+
+<script type="text/javascript">
+	$(function () {
+
+    $('#container').highcharts({
+        title: {
+            text: 'Dias clases por municipio año {{periodo}}'
+        },
+        xAxis: {
+            categories: [
+            	{% for d in data %}
+            		'{{d.departamento}} - <b>{{d.municipio}}</b>',
+            	{% endfor %}
+            ]
+        },
+        tooltip: {
+            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+            shared: true
+        },
+       
+        series: [{
+            name: 'Si hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_si}},
+            	{% endfor %}
+            ]
+        }, {
+            name: 'No hubo clases',
+            data: [
+            	{% for d in data %}
+            		{{d.total_no}},
+            	{% endfor %}
+            ]
+        }
+        ]
+	    });
+	});
+
+</script>

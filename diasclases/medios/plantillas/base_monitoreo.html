@@ -46,7 +46,7 @@
           <li class="divider"></li>
           <li><a href="{% url 'vista_inicio' %}"><i class="icon-home"></i>&nbsp;Inicio</a></li>
           <li class="divider"></li>
-          {% if user.is_superuser == True %}
+          {% if perms.general.add_voluntario or perms.general.change_voluntario %}
               {% if perms.general.add_voluntario or perms.general.change_voluntario %}
               <li class="has-dropdown">
                 <a href="#"><i class="icon-user"></i>&nbsp;Voluntarios</a>
