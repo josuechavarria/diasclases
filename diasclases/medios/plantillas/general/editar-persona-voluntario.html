@@ -20,7 +20,7 @@
 			<div class="large-12 columns">
 				<div data-alert class="alert-box info radius">
 				  <h4>Nota importante:</h4>
-				  <p>1. Verifique antes de guardar el usuario del Facilitador, Supervisor o Administrador VERIFIQUE que el tipo de persona sea el correcto, ya que según el tipo de persona que se esté registrando se le asignarán los privilegios en el sistema.</p>
+				  <p>1. Verifique antes de guardar el usuario del Facilitador, Supervisor o Administrador que el tipo de persona sea el correcto, ya que según el tipo de persona que se esté registrando se le asignarán los privilegios en el sistema.</p>
 				  <a href="#" class="close">&times;</a>
 				</div>
 			</div>
@@ -76,7 +76,7 @@
 				{{formulario.primer_apellido}}
 			</div>
 			<div class="large-6 columns">
-				<label for="id_segundo_apellido">Segundo apellido: <small>Obligatorio</small></label>
+				<label for="id_segundo_apellido">Segundo apellido: </label>
 				{{formulario.segundo_apellido}}
 			</div>
 		</div>
@@ -121,6 +121,14 @@
 			<div class="large-12 columns">
 		      	<label for="id_organizacion">Organización a la que pertenece: </label>
 				{{formulario.organizacion}}
+		    </div>
+		</div>
+		<div class="row">
+			<div class="large-6 columns">
+		      	<label for="id_organizacion">Observaciones: </label>
+				{{formulario.observaciones}}
+		    </div>
+		    <div class="large-6 columns">
 		    </div>
 		</div>
 		<div class="row">
@@ -197,9 +205,9 @@
 				required: 'required',
 			})
 
-			$("#id_segundo_apellido").attr({
+			/*$("#id_segundo_apellido").attr({
 				required: 'required',
-			})
+			})*/
 
 			$("#id_fecha_nacimiento").attr({
 				pattern: '[0-9]{4}[\-]{1}[0-9]{2}[\-]{1}[0-9]{2}',
@@ -208,7 +216,7 @@
 
 			$("#id_telefono").attr({
 				required: 'required',
-				pattern: '[2|3|8|9][0-9]{7}',
+				pattern: '[2|3|8|9][0-9]{3}[\-]{0,1}[0-9]{4}',
 				title: 'El número de teléfono tiene un formato inválido.' 
 			})
 

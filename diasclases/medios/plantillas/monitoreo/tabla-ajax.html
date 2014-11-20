@@ -1,18 +1,19 @@
 
-{% verbatim %}
-    {{if dying}}Still alive.{{/if}}
-{% endverbatim %}
+{% load poll_extras %}
 
 <table id="reporte" width="100%">
 	<caption>Listado de Centros</caption>
 	  <thead>
-	    <tr>
+	  	<tr>
 	      <th>No.</th>
 	      <th>Cod.</th>
 	      <th>Departamento</th>
 	      {% if por_municipio == True %}
 	      <th>Cod.</th>
 	      <th>Municipio</th>
+	      {% endif %}
+	      {% if por_centro != True and por_nivel != True and por_tipo_centro != True and por_jornada != True %}
+	      <th>Centros</th>
 	      {% endif %}
 	      {% if por_centro == True %}
 	      <th >Codigo</th>
@@ -28,11 +29,14 @@
 	      <th >Jornada</th>
 	      {% endif %}
 	      {% for p in anio %}
-	      <th >Hubo Clases {{p}}</th>
-	      <th >No Hubo Clases {{p}}</th>
+	      <th >Si <br/>{{p}}</th>
+	      <th >No <br/>{{p}}</th>
+	      <th >Eficiencia <br/>{{p}}</th>
+	      <th >Avance <br/>{{p}}</th>
 	      {% endfor %}
 	    </tr>
 	  </thead>
+
 	  <tbody id="tbody">
 	  {% for c in instancia %}
 	    <tr>
@@ -42,6 +46,9 @@
 	      {% if por_municipio == True %}
 	      <td>{{c.codigo_municipio}}</td>
 	      <td>{{c.municipio}}</td>
+	      {% endif %}
+	      {% if por_centro != True and por_nivel != True and por_tipo_centro != True and por_jornada != True %}
+	      <td>{{c.centros}}</td>
 	      {% endif %}
 	      {% if por_centro == True %}
 	      <td>{{c.codigo}}</td>
@@ -57,18 +64,29 @@
 	      <td>{{c.jornada}}</td>
 	      {% endif %}
 	      {% for p in anio %}
-	      <td id="total_si_{{p}}_{{c.pk}}">{{c.|add:"total_si_"|add:p}}</td>
-	      <td id="total_no_{{p}}_{{c.pk}}"></td>
+	      {% with "total_si_"|add:p as anio_id %}
+	      <td>{{c|get_item:anio_id}}</td>
+	      {% endwith %}
+	      {% with "total_no_"|add:p as anio_id %}
+	      <td>{{c|get_item:anio_id}}</td>
+	      {% endwith %}
+	      {% with "eficiencia_"|add:p as anio_id %}
+	      <td>{{c|get_item:anio_id}}%</td>
+	      {% endwith %}
+	      {% with "avance_"|add:p as anio_id %}
+	      <td>{{c|get_item:anio_id}}%</td>
+	      {% endwith %}
 	      {% endfor %}
 	    </tr>
 	  {% endfor %}
 	  </tbody>
+
 	</table>
 
 	<script type="text/javascript">
 
-		$("#reporte").dataTable({
-	        dom: '<"top"ifrp<"clear">>T<"clear">lfrti',
+		var table = $("#reporte").dataTable({
+	        dom: '<"top"ifrp<"clear">><T<"clear">lfrtip>',
 	        tableTools: {
 	            "aButtons": [
 	                "copy",
@@ -77,11 +95,11 @@
 	                {
 	                    "sExtends": "pdf",
 	                    "sPdfOrientation": "landscape",
-	                    "sPdfMessage": "Reporte de días clases año {{anio}}."
+	                    "sPdfMessage": "Reporte de días clases año {% for anio in anio %}{{anio}},{% endfor %}"
 	                }
 	            ]
 	        }
-	    })
-	    
+	        
+	    })   
 	    
 	</script>

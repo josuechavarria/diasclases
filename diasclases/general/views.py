@@ -29,9 +29,9 @@ from django.db import transaction, IntegrityError
 from openpyxl.workbook import Workbook
 from openpyxl.compat import range
 from openpyxl.cell import get_column_letter
-from openpyxl.styles import Style, Color, Font, Alignment, NumberFormat
+from openpyxl.styles import Style, Color, Font, Alignment
 from openpyxl import load_workbook
-from openpyxl.datavalidation import DataValidation, ValidationType
+from openpyxl.worksheet.datavalidation import DataValidation, ValidationType
 from django.utils.encoding import smart_str
 from django.db import connections
 cursor = connections['default'].cursor()
@@ -180,15 +180,14 @@ def view_generar_excel(request):
 			semana = calendario_academico.objects.get(id=request.POST.get('semana'))
 			#print calendario_academico.objects.all().values_list('centro_semana__centro__centro__pk').query
 			if request.POST.get('municipio') == '' and request.POST.get('aldea') == '':
-				centrov = voluntario.objects.filter(centros__anio=periodo.objects.get(activo=True).anio, centros__departamento__pk=request.POST.get('departamento')).values_list('identidad','centros','primer_nombre', 'primer_apellido').distinct('identidad','centros')
-
+				centrov = voluntario.objects.filter(centros__departamento__pk=request.POST.get('departamento')).values_list('identidad','centros','primer_nombre', 'primer_apellido').distinct('identidad','centros')
 			if request.POST.get('municipio') != '' and request.POST.get('aldea') == '':
-				centrov = voluntario.objects.filter(centros__anio=periodo.objects.get(activo=True).anio, centros__departamento__pk=request.POST.get('departamento'), centros__municipio__pk=request.POST.get('municipio')).values_list('identidad','centros').distinct('identidad','centros')
+				centrov = voluntario.objects.filter(centros__departamento__pk=request.POST.get('departamento'), centros__municipio__pk=request.POST.get('municipio')).values_list('identidad','centros').distinct('identidad','centros')
 				mun=municipio.objects.get(pk=request.POST.get('municipio')).codigo_municipio
 				ald=""
 
 			if request.POST.get('municipio') != '' and request.POST.get('aldea') != '':
-				centrov = voluntario.objects.filter(centros__anio=periodo.objects.get(activo=True).anio, centros__departamento__pk=request.POST.get('departamento'), centros__municipio__pk=request.POST.get('municipio'), centros__aldea__pk=request.POST.get('aldea')).values_list('identidad','centros').distinct('identidad','centros')
+				centrov = voluntario.objects.filter(centros__departamento__pk=request.POST.get('departamento'), centros__municipio__pk=request.POST.get('municipio'), centros__aldea__pk=request.POST.get('aldea')).values_list('identidad','centros').distinct('identidad','centros')
 				mun=municipio.objects.get(pk=request.POST.get('municipio')).codigo_municipio
 				ald=aldea.objects.get(pk=request.POST.get('aldea')).codigo_aldea
 
@@ -239,36 +238,38 @@ def view_generar_excel(request):
 					break
 
 			row=5
+			con_semana=[rowg[0] for rowg in centro_semana.objects.filter(semana_id=request.POST.get('semana')).values_list('centro__centro__pk')]
 			for c in centrov:
-				centro=centro_educativo.objects.get(pk=c[1])
-				person=voluntario.objects.get(identidad=c[0])
-				ws.cell('%s%s'%('A', row)).value = str(centro.departamento)
-				ws.cell('%s%s'%('B', row)).value = str(centro.municipio)
-				ws.cell('%s%s'%('C', row)).value = str(centro.aldea)
-				ws.cell('%s%s'%('D', row)).value = str(centro.codigo)+ ' - ' +str(centro.nivel.encode('utf-8'))
-				ws.cell('%s%s'%('E', row)).value = str(centro.nombre.encode('utf-8'))
-				ws.cell('%s%s'%('F', row)).value = str(centro.tipo_docente)
-				ws.cell('%s%s'%('G', row)).value = str(person.identidad)+ ' - ' + str(person.primer_nombre.encode('utf-8')) +' '+ str(person.primer_apellido.encode('utf-8'))
-				ws.cell('%s%s'%('I', row)).value = str(semana.fecha_inicio.strftime("%d-%m-%Y"))
-				ws.cell('%s%s'%('J', row)).value = str(semana.fecha_fin.strftime("%d-%m-%Y"))
+				if c[1] not in centro_semana.objects.filter(semana_id=request.POST.get('semana')).values_list('centro__centro__pk'):
+					centro=centro_educativo.objects.get(pk=c[1])
+					person=voluntario.objects.get(identidad=c[0])
+					ws.cell('%s%s'%('A', row)).value = str(centro.departamento)
+					ws.cell('%s%s'%('B', row)).value = str(centro.municipio)
+					ws.cell('%s%s'%('C', row)).value = str(centro.aldea)
+					ws.cell('%s%s'%('D', row)).value = str(centro.codigo)+ ' - ' +str(centro.nivel.encode('utf-8'))
+					ws.cell('%s%s'%('E', row)).value = str(centro.nombre.encode('utf-8'))
+					ws.cell('%s%s'%('F', row)).value = str(centro.tipo_docente)
+					ws.cell('%s%s'%('G', row)).value = str(person.identidad)+ ' - ' + str(person.primer_nombre.encode('utf-8')) +' '+ str(person.primer_apellido.encode('utf-8'))
+					ws.cell('%s%s'%('I', row)).value = str(semana.fecha_inicio.strftime("%d-%m-%Y"))
+					ws.cell('%s%s'%('J', row)).value = str(semana.fecha_fin.strftime("%d-%m-%Y"))
 
-				dv.add_cell(ws.cell('%s%s'%('F', row)))
+					dv.add_cell(ws.cell('%s%s'%('F', row)))
 
-				if ws.cell('%s%s'%('K', 4)).value is not None:
-					ws.cell('%s%s'%('K', row)).value = 'S'
-				if ws.cell('%s%s'%('M', 4)).value is not None:
-					ws.cell('%s%s'%('M', row)).value = 'S'
-				if ws.cell('%s%s'%('O', 4)).value is not None:
-					ws.cell('%s%s'%('O', row)).value = 'S'
-				if ws.cell('%s%s'%('Q', 4)).value is not None:
-					ws.cell('%s%s'%('Q', row)).value = 'S'
-				if ws.cell('%s%s'%('S', 4)).value is not None:
-					ws.cell('%s%s'%('S', row)).value = 'S'
-				if ws.cell('%s%s'%('U', 4)).value is not None:
-					ws.cell('%s%s'%('U', row)).value = 'S'
+					if ws.cell('%s%s'%('K', 4)).value is not None:
+						ws.cell('%s%s'%('K', row)).value = 'S'
+					if ws.cell('%s%s'%('M', 4)).value is not None:
+						ws.cell('%s%s'%('M', row)).value = 'S'
+					if ws.cell('%s%s'%('O', 4)).value is not None:
+						ws.cell('%s%s'%('O', row)).value = 'S'
+					if ws.cell('%s%s'%('Q', 4)).value is not None:
+						ws.cell('%s%s'%('Q', row)).value = 'S'
+					if ws.cell('%s%s'%('S', 4)).value is not None:
+						ws.cell('%s%s'%('S', row)).value = 'S'
+					if ws.cell('%s%s'%('U', 4)).value is not None:
+						ws.cell('%s%s'%('U', row)).value = 'S'
 
 
-				row=row+1
+					row=row+1
 			# Agregando instrucciones
 			ws = wb.create_sheet()
 
@@ -297,9 +298,11 @@ def view_generar_excel(request):
 				rowy += 1
 
 			wb.save(response)
+			#return HttpResponse(0)
 			return response
-	if request.user.is_superuser:
-		formulario = DepartamentoForm(request.POST)
+	if request.user.is_superuser == True:
+		formulario = DepartamentoForm()
+		#print calendario_academico.objects.filter(fecha_inicio__year=periodo.objects.get(activo=True).anio).order_by('numero_semana')
 	else:
 		filtro=persona.objects.filter(user=request.user.pk).values_list('departamentos_asignados__id')
 		formulario = DepartamentoForm2(filtro, request.POST)
@@ -331,18 +334,18 @@ def view_consultar_centros(request):
 			print "es valido"
 
 			if request.POST.get('municipio') == '' and request.POST.get('aldea') == '':
-				centro_sem = centro_semana.objects.filter(centro__centro__departamento__pk=request.POST.get('departamento'), centro__centro__anio=periodo.objects.get(activo=True).anio).distinct('centro')
+				centro_sem = centro_semana.objects.filter(centro__centro__departamento__pk=request.POST.get('departamento')).distinct('centro')
 
 			if request.POST.get('municipio') != '' and request.POST.get('aldea') == '':
-				centro_sem = centro_semana.objects.filter(centro__centro__departamento__pk=request.POST.get('departamento'),centro__centro__municipio__pk=request.POST.get('municipio'), centro__centro__anio=periodo.objects.get(activo=True).anio).distinct('centro')
+				centro_sem = centro_semana.objects.filter(centro__centro__departamento__pk=request.POST.get('departamento'),centro__centro__municipio__pk=request.POST.get('municipio')).distinct('centro')
 
 			if request.POST.get('municipio') != '' and request.POST.get('aldea') != '':
-				centro_sem = centro_semana.objects.filter(centro__centro__departamento__pk=request.POST.get('departamento'),centro__centro__municipio__pk=request.POST.get('municipio'),centro__centro__aldea__pk=request.POST.get('aldea'), centro__centro__anio=periodo.objects.get(activo=True).anio).distinct('centro')
+				centro_sem = centro_semana.objects.filter(centro__centro__departamento__pk=request.POST.get('departamento'),centro__centro__municipio__pk=request.POST.get('municipio'),centro__centro__aldea__pk=request.POST.get('aldea')).distinct('centro')
 
 			
 			for row in centro_sem:
-				total_si=centro_semana.objects.filter(centro=row.centro, hubo_clases=True).count()
-				total_no=centro_semana.objects.filter(centro=row.centro, hubo_clases=False).count()
+				total_si=centro_semana.objects.filter(centro=row.centro, hubo_clases=True, fecha__year=periodo.objects.get(activo=True).anio).count()
+				total_no=centro_semana.objects.filter(centro=row.centro, hubo_clases=False, fecha__year=periodo.objects.get(activo=True).anio).count()
 				new_list.append({
 					'centro': row,
 					'total_si': total_si,
@@ -449,7 +452,7 @@ def view_nuevo_facilitador(request):
 					html_content += '<p style="font-size: 14px;"> <h4>Su usuario y contrasena para ingresar a nuestro sistema es:</h4> </p>'
 					html_content += '<br>	Usuario:	<b>'+usuario+'</b><br>	Contrasena: <b>'+clave+'</b><br/>Privilegios de: <b>'+grupo.name+'</b><br/><br/> Att.<p><h3>El equipo de Transformemos Honduras</h3></p><img src="http://ajs-us.org/sites/default/files/styles/medium/public/projects/Transformemos_Honduras_logo.jpg?itok=jjXJYJiI">'
 					#send_mail('Asunto del correo', cuerpo, 'josuechavarria89@gmail.com', [email])
-					msg=EmailMultiAlternatives('Datos de acceso sistema de monitoreo de dias clases',html_content,'recursos.humanos.seduc.hn@gmail.com',[formulario.cleaned_data['email']])
+					msg=EmailMultiAlternatives('Datos de acceso sistema de monitoreo de dias clases',html_content,'monitoreodiasclase@transhonduras.com',[formulario.cleaned_data['email']])
 					msg.attach_alternative(html_content,'text/html')
 					#msg.attach(settings.MEDIA_ROOT+'/estaticos/img/logo2.jpg', 'img_data', 'image/jpg')
 					#msg.attach_file(settings.MEDIA_ROOT+'/estaticos/img/logo2.jpg')
@@ -626,7 +629,7 @@ def view_restablecer_clave(request, persona_id):
 				html_content += '<p style="font-size: 14px;"> <h4>Su nuevo usuario y contrasena para ingresar a nuestro sistema es:</h4> </p>'
 				html_content += '<br>	Usuario:	<b>'+user.username+'</b><br>	Contrasena: <b>'+request.POST.get('nueva_clave')+'</b><br/>Privilegios de: <b>'+user_group.group.name+'</b><br/><br/> Att.<p><h3>El equipo de Transformemos Honduras</h3></p><img src="http://ajs-us.org/sites/default/files/styles/medium/public/projects/Transformemos_Honduras_logo.jpg?itok=jjXJYJiI">'
 				#send_mail('Asunto del correo', cuerpo, 'josuechavarria89@gmail.com', [email])
-				msg=EmailMultiAlternatives('Solicitud cambio de contrasena sistema de monitoreo de dias clases',html_content,'recursos.humanos.seduc.hn@gmail.com',[request.POST.get('email')])
+				msg=EmailMultiAlternatives('Solicitud cambio de contrasena sistema de monitoreo de dias clases',html_content,'monitoreodiasclase@transhonduras.com',[request.POST.get('email')])
 				msg.attach_alternative(html_content,'text/html')
 				try:
 					msg.send()
@@ -881,6 +884,13 @@ def view_generar_calendario(request):
 							fecha_fin=row['fecha_fin']
 						)
 					insert.save()
+			periodo.objects.filter(activo=True).update(activo=False)
+			period=periodo(
+					anio=datetime.strptime(request.POST.get('fecha_inicio_anio'), '%Y-%m-%d').date().year,
+					descripcion="Monitoreo de clases periodo "+str(datetime.strptime(request.POST.get('fecha_inicio_anio'), '%Y-%m-%d').date().year),
+					activo=True
+				)
+			period.save()
 			transaction.savepoint_commit(sid)
 			ctx = {'exito':'si'}
 		except Exception, e:
@@ -900,7 +910,7 @@ def view_listar_calendario(request):
 @permission_required('monitoreo.delete_calendario_academico', login_url='/inicio/')
 def view_eliminar_semanacalendario(request):
 	ctx={}
-	ctx={'calendario': calendario_academico.objects.exclude(pk__in=centro_semana.objects.filter(fecha__year=periodo.objects.get(activo=True).anio).values_list('semana').distinct('semana'), fecha_inicio__year=periodo.objects.get(activo=True).anio), 'anio':periodo.objects.get(activo=True).anio}
+	ctx={'calendario': calendario_academico.objects.exclude(pk__in=centro_semana.objects.filter(fecha__year=periodo.objects.get(activo=True).anio).values_list('semana').distinct('semana')).filter(fecha_inicio__year=periodo.objects.get(activo=True).anio), 'anio':periodo.objects.get(activo=True).anio}
 	return render_to_response('general/eliminar-semana-calendario.html', ctx ,context_instance=RequestContext(request))
 
 @permission_required('monitoreo.delete_calendario_academico', login_url='/inicio/')

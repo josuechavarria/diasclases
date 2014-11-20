@@ -60,10 +60,7 @@
                 <a href="#"><i class="fi-graph-bar"></i>&nbsp;Reportes de días clases</a>
                 <ul class="dropdown">
                   {% if perms.general.add_voluntario %}
-                  <li><a href="{% url 'vista_nueva_persona' %}"><i class="icon-table"></i>&nbsp;Por zona y centro educativo</a></li>
-                  {% endif %}
-                  {% if perms.general.change_voluntario %}
-                  <li><a href="{% url 'vista_buscar_voluntarios' %}"><i class="icon-edit"></i>&nbsp;Modificar</a></li>
+                  <li><a href="{% url 'vista_inicio_reportes' %}"><i class="icon-table"></i>&nbsp;Por zona y centro educativo</a></li>
                   {% endif %}
                 </ul>
               </li>
@@ -83,16 +80,18 @@
             <a href="#"><i class="fi-graph-pie"></i>&nbsp;Reportes Gráficos</a>
             <ul class="dropdown">
               {% if perms.general.puede_agregar_facilitadores or perms.general.puede_agregar_supervisores or perms.general.puede_agregar_administradores %}
-              <li><a href="{% url 'vista_nuevo_facilitador' %}"><i class="icon-plus"></i>&nbsp;Registrar usuario</a></li>
+              <li class="divider"></li>
+              <li class="divider"></li>
+              <li class="has-dropdown"><a href="{% url 'vista_nuevo_facilitador' %}"><i class="fi-graph-bar"></i>&nbsp;Comparativos</a>
+                <ul class="dropdown">
+                  <li><a href="{% url 'vista_reporte_nacional' %}"><i class="fi-graph-bar"></i>&nbsp;Nacional por departamento</a></li>
+                  <li><a href="{% url 'vista_reporte_municipal' %}"><i class="fi-graph-pie"></i>&nbsp;Municipal</a></li>
+                </ul>
+
+              </li>
               {% endif %}
               {% if perms.general.puede_editar_facilitadores or perms.general.puede_editar_supervisores or perms.general.puede_editar_administradores %}
-              <li><a href="{% url 'vista_buscar_usuarios' %}"><i class="icon-edit"></i>&nbsp;Modificar usuario</a></li>
-              {% endif %}
-              {% if perms.general.puede_restablecer_clave %}
-              <li><a href="{% url 'vista_buscar_usuarios_restablecer' %}"><i class="icon-refresh"></i>&nbsp;Restablecer Contraseña</a></li>
-              {% endif %}
-              {% if perms.general.puede_deshabilitar_facilitadores or perms.general.puede_deshabilitar_supervisores or perms.general.puede_deshabilitar_administradores %}
-              <li><a href="{% url 'vista_buscar_usuarios_deshabilitar' %}"><i class="icon-unlock"></i>/<i class="icon-lock"></i>&nbsp;Habilitar-Deshabilitar usuario</a></li>
+              <li><a href="{% url 'vista_buscar_usuarios' %}"><i class="fi-graph-pie"></i>&nbsp;Otros</a></li>
               {% endif %}
             </ul>
           </li>
@@ -147,10 +146,12 @@
 </body>
 
   
-
+  <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/foundation/foundation.topbar.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/dataTables.tableTools.js"></script>
+  <script src="{{ MEDIA_URL }}estaticos/highcharts/js/highcharts.js"></script>
+  <script src="{{ MEDIA_URL }}estaticos/highcharts/js/modules/exporting.js"></script>
 
 
   <script>

@@ -73,7 +73,6 @@ class organizacion(models.Model):
 		return self.descripcion
 
 class centro_educativo(models.Model):
-	anio=models.IntegerField()
 	codigo=models.CharField(max_length=12)
 	nombre=models.CharField(max_length=512)
 	departamento=models.ForeignKey(departamento)
@@ -103,14 +102,15 @@ class voluntario(models.Model):
 	primer_nombre=models.CharField(max_length=64)
 	segundo_nombre=models.CharField(max_length=64, null=True, blank=True, default=None)
 	primer_apellido=models.CharField(max_length=64)
-	segundo_apellido=models.CharField(max_length=64)
+	segundo_apellido=models.CharField(max_length=64, null=True, blank=True, default=None)
 	sexo=models.CharField(max_length=1)
 	fecha_nacimiento=models.DateField(null=True, blank=True, default=None)
-	telefono=models.CharField(max_length=8)
+	telefono=models.CharField(max_length=9)
 	tipo_persona=models.ForeignKey(tipo_persona)
 	organizacion=models.ForeignKey(organizacion)
 	centros=models.ManyToManyField(centro_educativo)
 	activo=models.BooleanField()
+	observaciones=models.TextField(null=True, blank=True, default=None)
 	usuario_creador=models.ForeignKey(User, related_name='pe_usuario_creador')
 	fecha_creacion=models.DateField(default=datetime.now())
 	usuario_modificador=models.ForeignKey(User, related_name='pe_usuario_modificador')

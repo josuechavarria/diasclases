@@ -20,9 +20,9 @@ from django.db import transaction, IntegrityError
 from openpyxl.workbook import Workbook
 from openpyxl.compat import range
 from openpyxl.cell import get_column_letter
-from openpyxl.styles import Style, Color, Font, Alignment, NumberFormat
+from openpyxl.styles import Style, Color, Font, Alignment
 from openpyxl import load_workbook
-from openpyxl.datavalidation import DataValidation, ValidationType
+from openpyxl.worksheet.datavalidation import DataValidation, ValidationType
 
 
 def my_range(start, end, step):
@@ -49,7 +49,8 @@ def validar_excel(archivo_excel):
 	num_error=1
 	try: 
 		wb = load_workbook(filename = archivo_excel)
-		sheet_ranges = wb.active
+		#print wb.get_sheet_by_name(wb.get_sheet_names()[0])
+		sheet_ranges = wb.get_sheet_by_name(wb.get_sheet_names()[0])
 		#print sheet_ranges['A4'].value # D18
 		razones1=[row[0] for row in razones.objects.all().values_list('id')]
 		row=5
@@ -69,7 +70,7 @@ def validar_excel(archivo_excel):
 				})
 				num_error=num_error+1
 			# Validar que el centro exista y tenga voluntario
-			if not voluntario.objects.filter(centros__codigo=sheet_ranges['D%s'%(row)].value.split('-')[0].strip(), centros__anio=periodo.objects.get(activo=True).anio, centros__en_funcionamiento=True):
+			if not voluntario.objects.filter(centros__codigo=sheet_ranges['D%s'%(row)].value.split('-')[0].strip(), centros__en_funcionamiento=True):
 				#print voluntario.objects.filter(centros__codigo=sheet_ranges['D%s'%(row)].value, centros__anio=periodo.objects.get(activo=True).anio, centros__en_funcionamiento=True)
 				listaError.append({
 					'numero': num_error,
@@ -87,7 +88,7 @@ def validar_excel(archivo_excel):
 				num_error=num_error+1
 
 			# Validar que exista la combinacion centro voluntario
-			if not voluntario.objects.filter(identidad=sheet_ranges['G%s'%(row)].value.split('-')[0].strip(), activo=True,centros__codigo=sheet_ranges['D%s'%(row)].value.split('-')[0].strip(), centros__anio=periodo.objects.get(activo=True).anio, centros__en_funcionamiento=True):
+			if not voluntario.objects.filter(identidad=sheet_ranges['G%s'%(row)].value.split('-')[0].strip(), activo=True,centros__codigo=sheet_ranges['D%s'%(row)].value.split('-')[0].strip(), centros__en_funcionamiento=True):
 				#print voluntario.objects.filter(centros__codigo=sheet_ranges['D%s'%(row)].value, centros__anio=periodo.objects.get(activo=True).anio, centros__en_funcionamiento=True)
 				listaError.append({
 					'numero': num_error,
@@ -154,7 +155,8 @@ def validar_excel(archivo_excel):
 @transaction.atomic
 def guardar_excel(archivo_excel, usuario): 
 		wb = load_workbook(filename = archivo_excel)
-		ws = wb.active
+		#print wb.get_sheet_names()
+		ws = wb.get_sheet_by_name(wb.get_sheet_names()[0])
 		listaError=[]
 		num_error=1
 		duplicados=False
