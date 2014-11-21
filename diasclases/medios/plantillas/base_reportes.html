@@ -35,7 +35,7 @@
   
   <script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/vendor/jquery.js"></script>
 
-  
+  <style type="text/css">html{zoom:90%;}</style>
   
   <div class="fixed sticky">
       <nav class="top-bar" data-topbar role="navigation" data-options="sticky_on: large">
@@ -61,6 +61,9 @@
                 <ul class="dropdown">
                   {% if perms.general.add_voluntario %}
                   <li><a href="{% url 'vista_inicio_reportes' %}"><i class="icon-table"></i>&nbsp;Por zona y centro educativo</a></li>
+                  {% endif %}
+                  {% if perms.general.add_voluntario %}
+                  <li><a href="{% url 'vista_reporte_totalvoluntarios' %}"><i class="icon-table"></i>&nbsp;Total de voluntarios</a></li>
                   {% endif %}
                 </ul>
               </li>

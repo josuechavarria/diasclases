@@ -1,0 +1,150 @@
+{% extends "base_reportes.html" %}
+
+{% block extracss %}
+	
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/jquery.multiselect.css" />
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}estaticos/multiwidget/style.css" />
+
+	<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/ui-lightness/jquery-ui.css" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}estaticos/css/dataTables.colVis.css">
+
+	
+{% endblock %}
+
+{% block content %}
+	
+		<br/><br/><h4 class="site-title">Total de voluntarios registrados </h4>
+		<form method="POST" id="frm_reportes" class="form-horizontal" role="form" {% if formulario.is_multipart %}enctype="multipart/form-data"{% endif %}>
+			{{ formulario.non_field_errors }}
+			{% if mensaje %}<div class="alert alert-danger">{{ mensaje }}</div>{% endif %}
+			{% csrf_token %}
+			
+			<div class="large-12 columns">
+				<div class="large-8 columns">
+				<label>Agrupar por:</label>
+				
+					<input id="id_agrupar_3" type="checkbox" value=", muni.codigo_municipio, muni.descripcion municipio" name="agrupar"><label for="id_agrupar_3"><b>Municipio</b></label></input>
+					<br/><br/><br/>
+				</div>
+				<div class="large-4 columns">
+					&nbsp;
+				</div>
+			</div>
+		
+		</form>
+	
+{% endblock %}
+
+{% block resultado %}
+<div class="large-1 columns">
+&nbsp;
+</div>
+<div class="large-6 columns">
+<!--<i class="fi-results size-21">  Resultados</i>-->
+	<div id="info_tabla2">
+	</div>
+	<div id="info_tabla">
+	<table id="reporte" width="100%">
+	<caption>Total de voluntarios: {{total}}</caption>
+	  <thead>
+	    <tr>
+	      <th>Cod.</th>
+	      <th>Departamento</th>
+	      {% if por_municipio == True %}
+	      <th>Cod.</th>
+	      <th>Municipio</th>
+	      {% endif %}
+	      <th >Voluntarios</th>
+	    </tr>
+	  </thead>
+	  <tbody id="tbody">
+	  {% for c in instancia %}
+	    <tr>
+	      <td>{{c.codigo_departamento}}</td>
+	      <td>{{c.departamento}}</td>
+	      {% if por_municipio == True %}
+	      <td>{{c.codigo_municipio}}</td>
+	      <td>{{c.municipio}}</td>
+	      {% endif %}
+	      <td>{{c.voluntarios}}</td>
+	    </tr>
+	  {% endfor %}
+	  </tbody>
+	</table>
+	</div>
+</div>
+<div class="large-5 columns">
+&nbsp;
+</div>
+{% endblock %}
+
+{% block extrajs %}
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/js/dataTables.colVis.js"></script>
+
+	<script type="text/javascript" src="{{ MEDIA_URL }}estaticos/multiwidget/src/jquery.multiselect.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var group
+			$("input[name=agrupar]").on("click", function(e){
+
+				if ($("#id_agrupar_3").is(':checked')){
+					group= ',muni.codigo_municipio, muni.descripcion'
+				}else{
+					group= ''
+				}
+				$.ajax({
+					type: "POST",
+					data: $("#frm_reportes").serialize()+"&group= "+ group,
+					url: "{% url 'vista_reporte_totalvoluntarios' %}",
+					success: function(msg)
+					{
+						//alert(msg)
+						$("#info_tabla").html(msg)
+
+					}
+				});
+			})
+
+			
+		})
+
+
+		$.extend($.fn.dataTable.defaults, {
+	    "searching": true,
+	    "ordering": true,
+	    "show": false,
+	    "processing": true,
+	    "autoWidth": false,
+	    "lengthChange": false,
+	    "info": false,
+	    "language": {
+		    "paginate": {
+		      "first": "Primero",
+		      "previous": "Anterior",
+		      "next": "Siguiente",
+		      "last": "Último",
+		    },
+		    "search": "Buscar"
+  		},
+  		"pageLength": 20
+		});
+		$("#reporte").dataTable({
+	        dom: '<"top"iflrip<"clear">>',
+	        tableTools: {
+	            "aButtons": [
+	                "copy",
+	                "csv",
+	                "xls",
+	                {
+	                    "sExtends": "pdf",
+	                    "sPdfOrientation": "landscape",
+	                    "sPdfMessage": "Reporte de voluntarios registrados."
+	                }
+	            ]
+	        }
+	    })
+	    
+	</script>
+{% endblock %}

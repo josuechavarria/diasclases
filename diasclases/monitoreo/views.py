@@ -574,3 +574,65 @@ def view_reporte_municipal(request):
 	else:
 		ctx={'data': reporteObject, 'anio': periodo.objects.all().order_by('anio'), 'periodo': request.POST.get('periodo'), 'departamentos': departamento.objects.all().order_by('id')}
 		return HttpResponse(render_to_response('monitoreo/grafico-reportes-municipal.html', ctx, context_instance=RequestContext(request)))
+
+
+
+@permission_required('monitoreo.puede_entrar_reportes', login_url='/inicio/')
+def view_reporte_totalvoluntarios(request):
+	ctx={}
+	new_list=[]
+	cursor = connections['default'].cursor()
+	selects=""
+	por_municipio=False
+	groupby=""
+	query=""
+
+	if request.POST.get('group') is not None:
+		groupby=request.POST.get('group')
+	
+	for row in request.POST.getlist('agrupar'):
+		selects += row
+
+	query = """
+
+		SELECT depto.codigo_departamento, depto.descripcion departamento
+		%s
+		,count(distinct voluntario_id) voluntarios
+		  FROM general_voluntario_centros vc
+		  INNER JOIN general_centro_educativo centro ON centro.id=vc.centro_educativo_id
+		  INNER JOIN general_voluntario vol ON (vol.id=vc.voluntario_id and vol.activo=True)
+		  RIGHT JOIN general_municipio muni ON muni.id=centro.municipio_id
+		  RIGHT JOIN general_departamento depto ON depto.id=muni.departamento_id
+
+		  GROUP BY depto.codigo_departamento, depto.descripcion%s
+		  ORDER BY codigo_departamento%s asc
+	"""%(selects, groupby, groupby)
+
+	cursor.execute(query)
+	reporteObject = dictfetchall(cursor)
+	cursor.close()
+	print query
+
+	cont=0
+	for row in reporteObject:
+		cont += 1
+		a= dict(
+			pk=cont,
+			codigo_departamento= row['codigo_departamento'],
+			departamento= row['departamento'],
+			voluntarios= row['voluntarios']
+		)
+
+		if row.has_key('municipio') == True:
+			por_municipio = True
+			a.update({'codigo_municipio': row['codigo_municipio']})
+			a.update({'municipio': row['municipio']})
+				
+		new_list.append(a)
+	total= voluntario.objects.filter(activo=True).distinct('centros__voluntario').count()
+	if request.method == 'GET':
+		ctx={'instancia': reporteObject, 'por_municipio': por_municipio, 'total': total}
+		return render_to_response('monitoreo/inicio-reportes-totalvoluntarios.html', ctx, context_instance=RequestContext(request))
+	else:
+		ctx={'instancia': reporteObject, 'por_municipio': por_municipio, 'total': total}
+		return HttpResponse(render_to_response('monitoreo/tabla-ajax-totalvoluntarios.html', ctx, context_instance=RequestContext(request)))
